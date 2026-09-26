@@ -6,15 +6,16 @@ Repositorio: [gproatechnology/GProA_SAIyDD](https://github.com/gproatechnology/G
 
 ## Estado del proyecto
 
-**Estado actual:** prototipo funcional en fase alfa.
+**Estado actual:** prototipo funcional en fase alfa — **consolidado en este repositorio**.
 
-La demo web está implementada en el entorno:
+La demo web y la documentación ya están versionadas aquí:
 
 ```text
-../Pagina_web/proyectos/saiydd/demo/
+SAIyDD/
+├── demo/           # Demo Vite completa (fuentes, assets, build config)
+├── docs/           # Manual de usuario interactivo + datos
+└── rojo/           # Preparado para sincronización Rojo (pendiente default.project.json)
 ```
-
-Este repositorio actúa como raíz de documentación y coordinación del producto. La integración con Roblox Studio y Rojo está planificada como siguiente fase.
 
 ## Arquitectura
 
@@ -77,13 +78,13 @@ sequenceDiagram
 | `sanitize.js` | Validación y saneamiento de texto |
 | `rate-limiter.js` | Límites locales por tipo de acción |
 
-## Estructura prevista del repositorio
+## Estructura del repositorio
 
 ```text
 SAIyDD/
 ├── LICENSE
 ├── README.md
-├── SDD_SaIyDD.md
+├── SDD_SaIyDD.md          # Documento de Diseño de Software
 ├── demo/
 │   ├── index.html
 │   ├── package.json
@@ -91,24 +92,49 @@ SAIyDD/
 │   ├── vite.config.js
 │   └── src/
 │       ├── assets/
+│       │   └── images/
 │       ├── css/
-│       └── js/
+│       │   ├── variables.css
+│       │   ├── styles.css
+│       │   └── modules/
+│       │       ├── screens.css
+│       │       └── blocks-world.css
+│       ├── js/
+│       │   ├── main.js
+│       │   ├── modules/
+│       │   │   ├── app.js
+│       │   │   ├── bienvenida.js
+│       │   │   ├── menu.js
+│       │   │   ├── chatbot.js
+│       │   │   ├── dashboard.js
+│       │   │   ├── juego.js
+│       │   │   ├── mascota.js
+│       │   │   ├── mascota-ui.js
+│       │   │   ├── voz.js
+│       │   │   ├── blocks-world.js
+│       │   │   └── api.js
+│       │   ├── utils/
+│       │   │   ├── sanitize.js
+│       │   │   └── rate-limiter.js
+│       │   └── data/
+│       │       └── data.js
 ├── docs/
-│   ├── manual-usuario.html
+│   ├── manual-usuario.html   # Manual interactivo con búsqueda, TOC, tema
 │   ├── manual.css
-│   └── data.js
+│   └── data.js               # Contenido y renderizado del manual
 └── rojo/
-    └── default.project.json       # Pendiente de crear
+    ├── shared/               # ModuleScripts compartidos (pendiente)
+    ├── server/               # Scripts ServerScriptService (pendiente)
+    ├── client/               # Scripts StarterPlayerScripts (pendiente)
+    └── default.project.json  # Pendiente de crear
 ```
-
-La estructura anterior describe el objetivo de consolidación. Actualmente la implementación web completa se encuentra en el entorno sibling indicado al inicio.
 
 ## Ejecución de la demo
 
-Desde el entorno que contiene la implementación:
+Desde la raíz del repo:
 
 ```powershell
-cd ..\Pagina_web\proyectos\saiydd\demo
+cd demo
 npm install
 npm run dev
 ```
@@ -120,6 +146,15 @@ Para generar una build de producción:
 ```powershell
 npm run build
 ```
+
+## Manual de usuario
+
+Abrir `docs/manual-usuario.html` en el navegador (o servir con `npx serve docs`). Incluye:
+
+- Tabla de contenidos navegable
+- Búsqueda en tiempo real
+- Tema claro/oscuro persistente
+- Secciones: introducción, acceso, mascota, menú, juego, chatbot, voz, dashboard, seguridad, alcance, FAQ, soporte
 
 ## Integración con Roblox
 
@@ -137,31 +172,32 @@ flowchart TB
 
 | Elemento | Estado |
 |---|---|
-| Demo web Vite | Funcional |
-| Repositorio Git remoto | Conectado y sincronizado |
-| Roblox Studio | Instalado localmente |
-| Rojo | Pendiente de instalar/configurar |
-| Proyecto Roblox | Pendiente de crear o enlazar |
-| Backend seguro | Pendiente |
-| Pruebas automatizadas | Pendientes |
-| Configuración de accesibilidad y seguridad productiva | Pendiente |
+| Demo web Vite | ✅ Consolidada en `demo/` |
+| Documentación | ✅ Consolidada en `docs/` |
+| Repositorio Git remoto | ✅ Conectado y sincronizado |
+| Roblox Studio | ✅ Instalado localmente |
+| Rojo (extensión + CLI) | ⏳ Pendiente de instalar/configurar |
+| Proyecto Roblox (`default.project.json`) | ⏳ Pendiente |
+| Backend seguro | ⏳ Pendiente |
+| Pruebas automatizadas | ⏳ Pendientes |
+| Accesibilidad y seguridad productiva | ⏳ Pendiente |
 
-El siguiente paso técnico es crear la estructura de sincronización Rojo, definir el lugar del proyecto Roblox y establecer el contrato API entre Luau, el backend y la demo web.
+El siguiente paso técnico es instalar la extensión Rojo + CLI, crear `rojo/default.project.json` y la estructura `shared/server/client` para Luau.
 
 ## Seguridad y alcance de la demo
 
 - Los datos de perfil y progreso se guardan en `localStorage` del navegador.
 - El chat y las actividades usan respuestas preaprobadas; no hay generación libre.
 - La voz depende de APIs nativas del navegador y puede no estar disponible en todos los entornos.
-- El PIN mostrado en la demo es únicamente de prueba y no debe utilizarse en producción.
+- El PIN mostrado en la demo es únicamente de prueba (`1234`) y no debe utilizarse en producción.
 - Antes de una publicación real se deben completar validaciones de seguridad, accesibilidad, moderación, consentimiento y privacidad infantil.
 
 ## Roadmap
 
-1. Consolidar en este repositorio la demo, documentación y configuración compartida.
+1. ✅ Consolidar en este repositorio la demo, documentación y configuración compartida.
 2. Corregir los hallazgos críticos de seguridad, el PIN de prueba y la fuga de animación.
 3. Añadir pruebas automatizadas, linting y validación de accesibilidad.
-4. Crear la configuración `default.project.json` y la estructura Luau para Rojo.
+4. Instalar extensión Rojo + CLI y crear `default.project.json` + estructura Luau.
 5. Definir backend, autenticación de tutores y contrato API.
 6. Conectar Roblox Studio con el servicio compartido y validar el flujo completo.
 

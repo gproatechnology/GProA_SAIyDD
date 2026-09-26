@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Usuario - SaIyDD 1.1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="manual.css">
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
+                <div>
+                    <div class="title">SaIyDD 1.1</div>
+                    <p style="color:var(--text-muted);margin-top:4px;">Manual de usuario y documentación interactiva</p>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <a href="../demo/" class="btn btn-outline">Abrir demo</a>
+                    <button id="themeToggle" class="theme-toggle">Tema</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="topbar">
+            <input id="search" type="text" placeholder="Buscar en la documentación...">
+            <a href="#inicio">Volver arriba</a>
+        </div>
+
+        <div class="layout">
+            <aside class="toc" id="toc">
+                <h4>Contenido</h4>
+            </aside>
+
+            <article class="doc" id="inicio">
+                <div id="docLoader" style="color:var(--text-muted);">Cargando documentación...</div>
+            </article>
+            <div id="noResults" class="note hidden">No se encontraron resultados para tu búsqueda.</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { buildDocSections, buildToc } from './data.js';
+
+        const search = document.getElementById('search');
+        const noResults = document.getElementById('noResults');
+        const tocLinks = () => Array.from(document.querySelectorAll('#toc a'));
+
+        buildDocSections();
+        buildToc();
+
+        document.getElementById('themeToggle')?.addEventListener('click', () => {
+            const isLight = document.body.classList.toggle('light-theme');
+            localStorage.setItem('docs-theme', isLight ? 'light' : 'dark');
+            updateThemeLabel(isLight);
+        });
+
+        function updateThemeLabel(isLight) {
+            const btn = document.getElementById('themeToggle');
+            if (!btn) return;
+            btn.textContent = isLight ? 'Tema claro' : 'Tema oscuro';
+        }
+
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('docs-theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+            updateThemeLabel(true);
+        } else if (savedTheme === 'dark') {
+            document.body.classList.remove('light-theme');
+            updateThemeLabel(false);
+        } else if (!systemPrefersDark) {
+            document.body.classList.add('light-theme');
+            updateThemeLabel(true);
+        } else {
+            updateThemeLabel(false);
+        }
+
+        function filterDoc(query) {
+            const q = (query || '').trim().toLowerCase();
+            const sections = document.querySelectorAll('.doc-section');
+            let visibleCount = 0;
+
+            sections.forEach((section) => {
+                const match = !q || (section.dataset.search || '').includes(q);
+                section.style.display = match ? '' : 'none';
+                if (match) visibleCount++;
+            });
+
+            if (noResults) noResults.classList.toggle('hidden', visibleCount > 0);
+        }
+
+        search?.addEventListener('input', (e) => {
+            filterDoc(e.target.value);
+        });
+
+        function initScrollspy() {
+            const links = tocLinks();
+            if (!links.length || !('IntersectionObserver' in window)) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    links.forEach((link) => {
+                        link.classList.toggle('active', link.dataset.target === entry.target.id);
+                    });
+                });
+            }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+
+            document.querySelectorAll('.doc-section').forEach((section) => observer.observe(section));
+        }
+
+        initScrollspy();
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+.screen--bienvenida, .screen--menu, .screen--chatbot, .screen--dashboard, .screen--juego, .screen--blocks {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-md);
+}
+.screen--bienvenida h1, .screen--menu h1, .screen--chatbot h1, .screen--dashboard h1, .screen--juego h1, .screen--blocks h1 {
+  font-size: 32px;
+  margin-bottom: var(--space-sm);
+  text-align: center;
+}
+.screen--bienvenida p, .screen--menu p, .screen--chatbot p, .screen--dashboard p, .screen--juego p, .screen--blocks p {
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-md);
+}
+.menu-grid button {
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: center; justify-content: center;
+  padding: var(--space-md);
+  font-size: 18px;
+}
+.chat {
+  display: flex; flex-direction: column; gap: 10px;
+  max-height: 60vh; overflow: auto;
+  padding: var(--space-md);
+  background: #f4f4f4;
+  border-radius: var(--radius-md);
+}
+.chat-msg { max-width: 80%; padding: 10px 14px; border-radius: var(--radius-md); }
+.chat-msg--bot { background: #fff; align-self: flex-start; }
+.chat-msg--user { background: var(--color-accent); color: #fff; align-self: flex-end; }
+.chat-input {
+  display: flex; gap: 10px; margin-top: var(--space-md);
+}
+.chat-input input { flex: 1; min-height: var(--touch-min); border-radius: var(--radius-md); border: 1px solid #ddd; padding: 0 14px; font: inherit; }
+#micBtn { min-height: var(--touch-min); border-radius: var(--radius-md); border: 2px solid #ddd; background: #fff; padding: 0 12px; }
+#micBtn:disabled { opacity: .6; cursor: not-allowed; }
+.mascota-bar {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #fff; border: 2px solid #eee; border-radius: 999px;
+  padding: 8px 12px; box-shadow: var(--shadow-sm);
+}
+.mascota-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg,#ffd166,#ffb703);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  border: 2px solid #222;
+}
+.mascota-name {
+  font-weight: 700; color: var(--color-text);
+  font-size: 16px;
+}
+.mascota-mute {
+  min-height: 40px; min-width: 40px; border-radius: 50%;
+  border: 2px solid #ddd; background: #fff;
+  font-size: 18px;
+}
+.dashboard { display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap; }
+.stat { background: #fff; border: 1px solid #eee; padding: var(--space-md); border-radius: var(--radius-md); text-align: center; min-width: 120px; }
+.stat h3 { font-size: 28px; color: var(--color-accent); }
+.dashboard-actions { display: flex; gap: var(--space-md); justify-content: center; margin-top: var(--space-lg); flex-wrap: wrap; }
+
+.screen--login .login-form { margin-bottom: var(--space-lg); }
+.screen--login .login-form label { display: block; font-weight: 700; margin-bottom: 6px; }
+.screen--login .login-form input {
+  width: 100%; max-width: 320px; margin: 0 auto;
+  padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid #ddd;
+  font: inherit; text-align: center; font-size: 18px;
+}
+.screen--login .avatars { margin: var(--space-md) 0; }
+.screen--juego .juego-body { margin-top: var(--space-md); }
+.juego-prompt { font-size: 22px; font-weight: 600; margin: var(--space-md) 0; text-align: center; }
+.juego-options { display: flex; gap: var(--space-md); justify-content: center; flex-wrap: wrap; }
+.juego-options button { min-width: 120px; min-height: 80px; font-size: 22px; }
+.juego-result { text-align: center; margin-top: var(--space-md); font-weight: 700; font-size: 20px; }
+.juego-result--ok { color: #047857; }
+.juego-result--fail { color: #b91c1c; }

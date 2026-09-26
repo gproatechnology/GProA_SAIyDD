@@ -1,0 +1,28 @@
+:root {
+  --font-family: 'Fredoka', system-ui, sans-serif;
+
+  --color-bg: #FFF9F0;
+  --color-surface: #FFFFFF;
+  --color-primary: #FFD166;
+  --color-primary-strong: #E6B84D;
+  --color-secondary: #06D6A0;
+  --color-accent: #118AB2;
+  --color-danger: #EF476F;
+  --color-text: #2B2D42;
+  --color-text-muted: #6B7280;
+
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.10);
+
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 20px;
+  --space-lg: 28px;
+  --space-xl: 40px;
+
+  --touch-min: 64px;
+}
