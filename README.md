@@ -176,13 +176,13 @@ flowchart TB
 | Documentación | ✅ Consolidada en `docs/` |
 | Repositorio Git remoto | ✅ Conectado y sincronizado |
 | Roblox Studio | ✅ Instalado localmente |
-| Rojo (extensión + CLI) | ⏳ Pendiente de instalar/configurar |
-| Proyecto Roblox (`default.project.json`) | ⏳ Pendiente |
+| Rojo (extensión + CLI) | ✅ Instalado y configurado |
+| Proyecto Roblox (`default.project.json`) | ✅ Completado |
 | Backend seguro | ⏳ Pendiente |
 | Pruebas automatizadas | ⏳ Pendientes |
 | Accesibilidad y seguridad productiva | ⏳ Pendiente |
 
-El siguiente paso técnico es instalar la extensión Rojo + CLI, crear `rojo/default.project.json` y la estructura `shared/server/client` para Luau.
+El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/default.project.json` y la estructura `shared/server/client` para Luau. **Completado**.
 
 ## Seguridad y alcance de la demo
 
@@ -197,9 +197,10 @@ El siguiente paso técnico es instalar la extensión Rojo + CLI, crear `rojo/def
 1. ✅ Consolidar en este repositorio la demo, documentación y configuración compartida.
 2. Corregir los hallazgos críticos de seguridad, el PIN de prueba y la fuga de animación.
 3. Añadir pruebas automatizadas, linting y validación de accesibilidad.
-4. Instalar extensión Rojo + CLI y crear `default.project.json` + estructura Luau.
-5. Definir backend, autenticación de tutores y contrato API.
-6. Conectar Roblox Studio con el servicio compartido y validar el flujo completo.
+4. ✅ Instalar extensión Rojo + CLI y crear `default.project.json` + estructura Luau.
+5. ✅ Sincronizar Roblox Studio con Rojo (live sync verificado + `rojo build` funcional).
+6. Definir backend, autenticación de tutores y contrato API.
+7. Conectar Roblox Studio con el servicio compartido y validar el flujo completo.
 
 ## Licencia
 
