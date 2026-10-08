@@ -36,8 +36,8 @@ flowchart LR
     G --> D
     J --> L[(localStorage)]
     G --> L
-    A --> API[api.js - capa mock]
-    API -. conexión futura .-> BE[(Backend seguro)]
+    A --> API[api.js - mock o backend]
+    API -- VITE_SAIYDD_API_URL --> BE[(Backend FastAPI)]
     BE <--> R[Roblox Studio]
     R <--> ROJO[Rojo]
 ```
@@ -82,12 +82,16 @@ sequenceDiagram
 
 ```text
 SAIyDD/
+├── .github/
+│   └── workflows/ci.yml   # CI: demo (npm) + backend (pytest + ruff)
 ├── LICENSE
 ├── README.md
 ├── backend/        # API FastAPI (Python) — venv, .env y *.db ignorados
 │   ├── requirements.txt
+│   ├── requirements-dev.txt
 │   ├── .env.example
-│   └── app/        # main, auth, errors, repositories, models, schemas, seed
+│   ├── app/        # main, auth, errors, repositories, models, schemas, seed
+│   └── tests/      # pytest + httpx (TestClient)
 ├── demo/
 │   ├── index.html
 │   ├── package.json
@@ -171,6 +175,8 @@ cd backend
 - Rutas de dominio protegidas con la dependencia `require_tutor` (401 sin/Con token inválido, 403 con rol insuficiente); `/api/health` y `/api/activities` son públicas.
 - Rate limiting con slowapi (login 10/min, registro 5/hora) y errores con formato `{"error": {"code", "message"}}`.
 - Configuración vía variables de entorno (ver `backend/.env.example`), incluye `JWT_SECRET`.
+- La demo se conecta al backend real configurando `VITE_SAIYDD_API_URL` y `VITE_SAIYDD_API_TOKEN` (ver `demo/.env.example`); sin esas variables usa su mock local. `submitAnswer` sigue siendo local: las respuestas son preaprobadas y no existe endpoint de validación.
+- Pruebas del backend: `pytest` (14 pruebas con `httpx`/TestClient en `backend/tests/`); lint con `ruff`. Ambos corren en CI (job `backend`).
 
 ## Manual de usuario
 
@@ -226,7 +232,7 @@ El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/de
 3. ✅ Añadir pruebas automatizadas (Vitest), linting (ESLint + Prettier), accesibilidad y CI (GitHub Actions).
 4. ✅ Instalar extensión Rojo + CLI y crear `default.project.json` + estructura Luau.
 5. ✅ Sincronizar Roblox Studio con Rojo (live sync verificado + `rojo build` funcional).
-6. ⏳ En progreso (etapa 3/4: auth de tutores y seguridad).
+6. ⏳ En progreso (etapa 4/4: integración, tests y CI).
 7. Conectar Roblox Studio con el servicio compartido y validar el flujo completo.
 
 ## Licencia

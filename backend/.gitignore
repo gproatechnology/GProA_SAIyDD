@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 *.db
 *.log
+.pytest_cache/
 .env
 .env.*
 !.env.example

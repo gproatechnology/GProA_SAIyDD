@@ -15,7 +15,7 @@ from app.auth import (
 from app.config import settings
 from app.database import engine, get_session, init_db
 from app.errors import register_error_handlers
-from app.models import ActivityModel, TutorModel
+from app.models import TutorModel
 from app.repositories import (
     activity_exists,
     child_exists,
