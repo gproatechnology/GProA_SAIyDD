@@ -45,9 +45,6 @@ Shared.EVENTS = {
 	healthCheck = "SAIyDDHealthCheck",
 }
 
--- Tiempo de espera de las peticiones HTTP, en segundos.
-Shared.TIMEOUT_SECONDS = 10
-
 -- Construye el payload de sesión en camelCase, como espera el backend
 -- (POST /api/sessions -> SessionRecordCreate).
 function Shared.buildSessionPayload(

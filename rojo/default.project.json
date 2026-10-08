@@ -6,6 +6,15 @@
       "$className": "ReplicatedStorage",
       "Shared": {
         "$path": "shared"
+      },
+      "Events": {
+        "$className": "Folder",
+        "SAIyDDRecordSession": {
+          "$className": "RemoteEvent"
+        },
+        "SAIyDDHealthCheck": {
+          "$className": "RemoteEvent"
+        }
       }
     },
     "ServerScriptService": {
