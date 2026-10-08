@@ -1,12 +1,12 @@
-import data from '../data/data.js';
-import { showBienvenida } from './bienvenida.js';
-import { showMenu } from './menu.js';
-import { showChatbot } from './chatbot.js';
-import { showDashboard } from './dashboard.js';
-import { showJuego } from './juego.js';
-import { showBlocksWorld } from './blocks-world.js';
+import data from "../data/data.js";
+import { showBienvenida } from "./bienvenida.js";
+import { showMenu } from "./menu.js";
+import { showChatbot } from "./chatbot.js";
+import { showDashboard } from "./dashboard.js";
+import { showJuego } from "./juego.js";
+import { showBlocksWorld } from "./blocks-world.js";
 
-const PROFILE_KEY = 'saiydd_profile';
+const PROFILE_KEY = "saiydd_profile";
 const profileFromStorage = () => {
   try {
     const raw = localStorage.getItem(PROFILE_KEY);
@@ -23,7 +23,7 @@ const saveProfile = (profile) => {
   }
 };
 
-let currentView = 'login';
+let currentView = "login";
 let activeChild = profileFromStorage() || data.childProfiles[0];
 
 const views = {
@@ -37,10 +37,15 @@ const views = {
 };
 
 function render() {
-  const app = document.getElementById('app');
+  const app = document.getElementById("app");
   const fn = views[currentView];
-  app.innerHTML = '';
+  app.innerHTML = "";
   fn({ app, activeChild, setView, saveProfile });
+  const section = app.querySelector("section");
+  if (section && !section.contains(document.activeElement)) {
+    section.setAttribute("tabindex", "-1");
+    section.focus({ preventScroll: true });
+  }
 }
 
 function setView(view) {

@@ -2,13 +2,13 @@ const mascota = {
   synth: window.speechSynthesis,
   voice: null,
   muted: false,
-  expression: 'neutral',
+  expression: "neutral",
 
   EXPRESSIONS: {
-    neutral: '😊',
-    happy: '🥳',
-    encourage: '🤩',
-    surprise: '😲',
+    neutral: "😊",
+    happy: "🥳",
+    encourage: "🤩",
+    surprise: "😲",
   },
 
   init() {
@@ -16,13 +16,13 @@ const mascota = {
     const setVoice = () => {
       try {
         const list = this.synth.getVoices?.() || [];
-        this.voice = list.find(x => x.lang?.startsWith('es')) || null;
+        this.voice = list.find((x) => x.lang?.startsWith("es")) || null;
       } catch {
         this.voice = null;
       }
     };
     setVoice();
-    this.synth.addEventListener?.('voiceschanged', setVoice);
+    this.synth.addEventListener?.("voiceschanged", setVoice);
   },
 
   setExpression(name) {

@@ -146,6 +146,15 @@ Para generar una build de producción:
 npm run build
 ```
 
+Calidad de código:
+
+```powershell
+npm run lint          # ESLint
+npm run format        # Prettier (escribe)
+npm run format:check  # Prettier (verifica)
+npm test              # Vitest (19 pruebas)
+```
+
 ## Manual de usuario
 
 Abrir `docs/manual-usuario.html` en el navegador (o servir con `npx serve docs`). Incluye:
@@ -177,8 +186,8 @@ flowchart TB
 | Roblox Studio | ✅ Instalado localmente |
 | Rojo (extensión + CLI) | ✅ Instalado y configurado |
 | Proyecto Roblox (`default.project.json`) | ✅ Completado |
+| Pruebas, linting y accesibilidad | ✅ Completados |
 | Backend seguro | ⏳ Pendiente |
-| Pruebas automatizadas | ⏳ Pendientes |
 | Accesibilidad y seguridad productiva | ⏳ Pendiente |
 
 El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/default.project.json` y la estructura `shared/server/client` para Luau. **Completado**.
@@ -196,7 +205,7 @@ El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/de
 
 1. ✅ Consolidar en este repositorio la demo, documentación y configuración compartida.
 2. ✅ Corregir los hallazgos críticos de seguridad (PIN externalizado + fuga de datos cerrada).
-3. Añadir pruebas automatizadas, linting y validación de accesibilidad.
+3. ✅ Añadir pruebas automatizadas (Vitest), linting (ESLint + Prettier), accesibilidad y CI (GitHub Actions).
 4. ✅ Instalar extensión Rojo + CLI y crear `default.project.json` + estructura Luau.
 5. ✅ Sincronizar Roblox Studio con Rojo (live sync verificado + `rojo build` funcional).
 6. Definir backend, autenticación de tutores y contrato API.

@@ -1,31 +1,64 @@
-import { allowAction } from '../utils/rate-limiter.js';
+import { allowAction } from "../utils/rate-limiter.js";
 
 const TILE = 48;
 const WORLD_W = 14;
 const WORLD_H = 10;
 
 const LEVELS = [
-  { id: 'lvl1', name: 'Playa', palette: ['#bde0fe','#a2d2ff','#cdb4db'], collectibles: [{ kind: 'star', x: 5, y: 2 }, { kind: 'letter', x: 9, y: 5 }, { kind: 'star', x: 3, y: 7 }, { kind: 'letter', x: 12, y: 1 }] },
-  { id: 'lvl2', name: 'Bosque', palette: ['#d8f3dc','#b7e4c7','#95d5b2'], collectibles: [{ kind: 'star', x: 2, y: 1 }, { kind: 'letter', x: 7, y: 3 }, { kind: 'star', x: 11, y: 6 }, { kind: 'letter', x: 4, y: 8 }] },
-  { id: 'lvl3', name: 'Nieve', palette: ['#f0f4f8','#d9e2ec','#bcccdc'], collectibles: [{ kind: 'star', x: 6, y: 4 }, { kind: 'letter', x: 1, y: 5 }, { kind: 'star', x: 10, y: 2 }, { kind: 'letter', x: 8, y: 7 }, { kind: 'star', x: 3, y: 3 }] },
+  {
+    id: "lvl1",
+    name: "Playa",
+    palette: ["#bde0fe", "#a2d2ff", "#cdb4db"],
+    collectibles: [
+      { kind: "star", x: 5, y: 2 },
+      { kind: "letter", x: 9, y: 5 },
+      { kind: "star", x: 3, y: 7 },
+      { kind: "letter", x: 12, y: 1 },
+    ],
+  },
+  {
+    id: "lvl2",
+    name: "Bosque",
+    palette: ["#d8f3dc", "#b7e4c7", "#95d5b2"],
+    collectibles: [
+      { kind: "star", x: 2, y: 1 },
+      { kind: "letter", x: 7, y: 3 },
+      { kind: "star", x: 11, y: 6 },
+      { kind: "letter", x: 4, y: 8 },
+    ],
+  },
+  {
+    id: "lvl3",
+    name: "Nieve",
+    palette: ["#f0f4f8", "#d9e2ec", "#bcccdc"],
+    collectibles: [
+      { kind: "star", x: 6, y: 4 },
+      { kind: "letter", x: 1, y: 5 },
+      { kind: "star", x: 10, y: 2 },
+      { kind: "letter", x: 8, y: 7 },
+      { kind: "star", x: 3, y: 3 },
+    ],
+  },
 ];
 
 function getSaveKey() {
   try {
     const u = new URL(window.location.href);
-    const p = u.pathname.replace(/\/+$/, '');
-    const parts = p.split('/').filter(Boolean);
-    const slug = parts[parts.length - 1] || 'blocks';
+    const p = u.pathname.replace(/\/+$/, "");
+    const parts = p.split("/").filter(Boolean);
+    const slug = parts[parts.length - 1] || "blocks";
     return `saiydd_blocks_${slug}`;
   } catch {
-    return 'saiydd_blocks_demo';
+    return "saiydd_blocks_demo";
   }
 }
 
 function loadProgress() {
   try {
     const raw = localStorage.getItem(getSaveKey());
-    return raw ? JSON.parse(raw) : { levelIndex: 0, totalStars: 0, totalLetters: 0 };
+    return raw
+      ? JSON.parse(raw)
+      : { levelIndex: 0, totalStars: 0, totalLetters: 0 };
   } catch {
     return { levelIndex: 0, totalStars: 0, totalLetters: 0 };
   }
@@ -40,15 +73,15 @@ function saveProgress(state) {
 }
 
 let levelIndex = 0;
-let player = { kind: 'player', x: 1, y: Math.floor(WORLD_H / 2) };
+let player = { kind: "player", x: 1, y: Math.floor(WORLD_H / 2) };
 let items = [];
 let collected = 0;
 let completed = false;
 
 function loadLevel() {
   const level = LEVELS[levelIndex];
-  player = { kind: 'player', x: 1, y: Math.floor(WORLD_H / 2) };
-  items = [{ ...player }, ...level.collectibles.map(c => ({ ...c }))];
+  player = { kind: "player", x: 1, y: Math.floor(WORLD_H / 2) };
+  items = [{ ...player }, ...level.collectibles.map((c) => ({ ...c }))];
   collected = 0;
   completed = false;
 }
@@ -59,7 +92,7 @@ function inBounds(x, y) {
 
 function move(dx, dy) {
   if (completed) return;
-  if (!allowAction('blocks-move', 30, 60000)) return;
+  if (!allowAction("blocks-move", 30, 60000)) return;
   const nx = player.x + dx;
   const ny = player.y + dy;
   if (!inBounds(nx, ny)) return;
@@ -71,53 +104,53 @@ function move(dx, dy) {
 function tick() {
   for (let i = items.length - 1; i >= 0; i--) {
     const it = items[i];
-    if (it.kind === 'player') continue;
+    if (it.kind === "player") continue;
     if (it.x === player.x && it.y === player.y) {
       items.splice(i, 1);
-      if (it.kind === 'star') {
+      if (it.kind === "star") {
         collected++;
-        showOverlay('¡Estrella! ⭐');
-      } else if (it.kind === 'letter') {
+        showOverlay("¡Estrella! ⭐");
+      } else if (it.kind === "letter") {
         collected++;
-        showOverlay('¡Letra! 🔤');
+        showOverlay("¡Letra! 🔤");
       }
     }
   }
-  if (!completed && items.filter(x => x.kind !== 'player').length === 0) {
+  if (!completed && items.filter((x) => x.kind !== "player").length === 0) {
     completed = true;
     const progress = loadProgress();
     progress.totalStars += collected;
     progress.levelIndex = Math.min(levelIndex + 1, LEVELS.length - 1);
     saveProgress(progress);
-    showOverlay('¡Completaste el nivel! 🎉');
+    showOverlay("¡Completaste el nivel! 🎉");
 
     setTimeout(() => {
       if (progress.levelIndex >= LEVELS.length) {
-        showOverlay('¡Ganaste todos los niveles! 🏆');
+        showOverlay("¡Ganaste todos los niveles! 🏆");
       }
     }, 950);
   }
 }
 
 function getItems() {
-  return [player, ...items.filter(x => x.kind !== 'player')];
+  return [player, ...items.filter((x) => x.kind !== "player")];
 }
 
 let overlayTimer = null;
 function showOverlay(msg) {
-  const wrap = document.createElement('div');
-  wrap.className = 'blocks-overlay';
+  const wrap = document.createElement("div");
+  wrap.className = "blocks-overlay";
   wrap.textContent = msg;
-  const root = document.getElementById('blocksStage');
-  const canvasWrap = root?.querySelector('.blocks-canvas-wrap');
+  const root = document.getElementById("blocksStage");
+  const canvasWrap = root?.querySelector(".blocks-canvas-wrap");
   if (canvasWrap) canvasWrap.appendChild(wrap);
   clearTimeout(overlayTimer);
   overlayTimer = setTimeout(() => wrap.remove(), 900);
 }
 
 export function showBlocksWorld({ app, setView }) {
-  const section = document.createElement('section');
-  section.className = 'screen screen--blocks';
+  const section = document.createElement("section");
+  section.className = "screen screen--blocks";
   section.innerHTML = `
     <div class="blocks-wrap">
       <div class="blocks-header">
@@ -150,19 +183,20 @@ export function showBlocksWorld({ app, setView }) {
   levelIndex = progress.levelIndex;
   loadLevel();
 
-  const canvasEl = section.querySelector('#blocksCanvas');
-  const ctx = canvasEl?.getContext('2d');
-  const hudEl = section.querySelector('#blocksHud');
-  const stageEl = section.querySelector('#blocksStage');
-  const nextBtn = section.querySelector('#nextLevelBtn');
+  const canvasEl = section.querySelector("#blocksCanvas");
+  const ctx = canvasEl?.getContext("2d");
+  const hudEl = section.querySelector("#blocksHud");
+  const stageEl = section.querySelector("#blocksStage");
+  const nextBtn = section.querySelector("#nextLevelBtn");
 
   if (!ctx) {
-    stageEl.innerHTML = '<p style="color:red">No se pudo iniciar el canvas.</p>';
+    stageEl.innerHTML =
+      '<p style="color:red">No se pudo iniciar el canvas.</p>';
     app.appendChild(section);
     return;
   }
 
-  function drawBlock(x, y, color, outline = '#222') {
+  function drawBlock(x, y, color, outline = "#222") {
     const px = x * TILE;
     const py = y * TILE;
     const s = TILE;
@@ -170,11 +204,11 @@ export function showBlocksWorld({ app, setView }) {
     ctx.fillStyle = color;
     ctx.fillRect(px, py, s, s);
 
-    ctx.fillStyle = 'rgba(255,255,255,.25)';
+    ctx.fillStyle = "rgba(255,255,255,.25)";
     ctx.fillRect(px, py, s, 8);
     ctx.fillRect(px, py, 8, s);
 
-    ctx.fillStyle = 'rgba(0,0,0,.15)';
+    ctx.fillStyle = "rgba(0,0,0,.15)";
     ctx.fillRect(px, py + s - 8, s, 8);
     ctx.fillRect(px + s - 8, py, 8, s);
 
@@ -188,13 +222,13 @@ export function showBlocksWorld({ app, setView }) {
     const py = by * TILE;
     const s = TILE;
 
-    ctx.fillStyle = '#ffd166';
+    ctx.fillStyle = "#ffd166";
     ctx.fillRect(px + 6, py + 6, s - 12, s - 12);
-    ctx.strokeStyle = '#222';
+    ctx.strokeStyle = "#222";
     ctx.lineWidth = 2;
     ctx.strokeRect(px + 6, py + 6, s - 12, s - 12);
 
-    ctx.fillStyle = '#222';
+    ctx.fillStyle = "#222";
     ctx.fillRect(px + 18, py + 18, 8, 8);
     ctx.fillRect(px + 30, py + 18, 8, 8);
     ctx.fillRect(px + 20, py + 34, 16, 6);
@@ -205,11 +239,11 @@ export function showBlocksWorld({ app, setView }) {
     const py = by * TILE;
     const s = TILE;
 
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = "#fff";
     ctx.font = `${s - 10}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const symbol = kind === 'star' ? '⭐' : kind === 'letter' ? 'Aa' : '?';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const symbol = kind === "star" ? "⭐" : kind === "letter" ? "Aa" : "?";
     ctx.fillText(symbol, px + s / 2, py + s / 2);
   }
 
@@ -224,7 +258,7 @@ export function showBlocksWorld({ app, setView }) {
   }
 
   function drawClouds() {
-    ctx.fillStyle = 'rgba(255,255,255,.7)';
+    ctx.fillStyle = "rgba(255,255,255,.7)";
     ctx.fillRect(60, 20, 140, 30);
     ctx.fillRect(280, 50, 120, 24);
   }
@@ -237,13 +271,13 @@ export function showBlocksWorld({ app, setView }) {
 
     for (let y = 0; y < WORLD_H; y++) {
       for (let x = 0; x < WORLD_W; x++) {
-        const shade = (x + y) % 2 === 0 ? '#7dcea0' : '#76c7a0';
-        drawBlock(x, y, shade, '#2f4f4f');
+        const shade = (x + y) % 2 === 0 ? "#7dcea0" : "#76c7a0";
+        drawBlock(x, y, shade, "#2f4f4f");
       }
     }
 
     getItems().forEach((it) => {
-      if (it.kind === 'player') drawVoxelPlayer(it.x, it.y);
+      if (it.kind === "player") drawVoxelPlayer(it.x, it.y);
       else drawCollectible(it.x, it.y, it.kind);
     });
   }
@@ -260,7 +294,16 @@ export function showBlocksWorld({ app, setView }) {
   renderAll();
 
   const keys = new Set();
-  const dirs = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] };
+  const dirs = {
+    ArrowUp: [0, -1],
+    ArrowDown: [0, 1],
+    ArrowLeft: [-1, 0],
+    ArrowRight: [1, 0],
+    w: [0, -1],
+    s: [0, 1],
+    a: [-1, 0],
+    d: [1, 0],
+  };
   let rafId = null;
   const btnTimers = new Set();
 
@@ -276,8 +319,10 @@ export function showBlocksWorld({ app, setView }) {
     rafId = requestAnimationFrame(keyLoop);
   }
 
-  section.addEventListener('keydown', (e) => { keys.add(e.key); });
-  section.addEventListener('keyup', (e) => keys.delete(e.key));
+  section.addEventListener("keydown", (e) => {
+    keys.add(e.key);
+  });
+  section.addEventListener("keyup", (e) => keys.delete(e.key));
   rafId = requestAnimationFrame(keyLoop);
 
   const stopRepeat = (btn) => {
@@ -287,7 +332,7 @@ export function showBlocksWorld({ app, setView }) {
       btn._timer = null;
     }
   };
-  section.querySelectorAll('[data-dir]').forEach((btn) => {
+  section.querySelectorAll("[data-dir]").forEach((btn) => {
     const repeat = () => {
       const d = btn.dataset.dir;
       const m = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[d];
@@ -296,9 +341,13 @@ export function showBlocksWorld({ app, setView }) {
       btn._timer = requestAnimationFrame(repeat);
       btnTimers.add(btn._timer);
     };
-    btn.addEventListener('pointerdown', (e) => { e.preventDefault(); stopRepeat(btn); repeat(); });
-    btn.addEventListener('pointerup', () => stopRepeat(btn));
-    btn.addEventListener('pointerleave', () => stopRepeat(btn));
+    btn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      stopRepeat(btn);
+      repeat();
+    });
+    btn.addEventListener("pointerup", () => stopRepeat(btn));
+    btn.addEventListener("pointerleave", () => stopRepeat(btn));
   });
 
   const onStorage = () => {
@@ -309,7 +358,7 @@ export function showBlocksWorld({ app, setView }) {
       renderAll();
     }
   };
-  window.addEventListener('storage', onStorage);
+  window.addEventListener("storage", onStorage);
 
   function cleanup() {
     keys.clear();
@@ -319,15 +368,15 @@ export function showBlocksWorld({ app, setView }) {
     }
     btnTimers.forEach((t) => cancelAnimationFrame(t));
     btnTimers.clear();
-    window.removeEventListener('storage', onStorage);
+    window.removeEventListener("storage", onStorage);
   }
 
-  section.querySelector('#exitBlocks').addEventListener('click', () => {
+  section.querySelector("#exitBlocks").addEventListener("click", () => {
     cleanup();
-    setView('menu');
+    setView("menu");
   });
 
-  nextBtn.addEventListener('click', () => {
+  nextBtn.addEventListener("click", () => {
     if (levelIndex + 1 < LEVELS.length) {
       levelIndex++;
       loadLevel();
@@ -337,10 +386,10 @@ export function showBlocksWorld({ app, setView }) {
     }
   });
 
-  section.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
+  section.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
       cleanup();
-      setView('menu');
+      setView("menu");
     }
   });
 
