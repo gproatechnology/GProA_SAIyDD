@@ -18,7 +18,6 @@ export const activities = [
     difficulty: 'easy',
     durationSeconds: 120,
     prompts: ['¿Qué animal hace "mu"?', '¿Qué animal hace "oink"?'],
-    correctIndices: [0, 1],
     audioAssets: ['cow.mp3', 'pig.mp3']
   },
   {
@@ -29,7 +28,6 @@ export const activities = [
     difficulty: 'easy',
     durationSeconds: 150,
     prompts: ['Selecciona el color rojo', 'Selecciona el color azul'],
-    correctIndices: [0, 2],
     options: ['🔴', '🟢', '🔵', '🟡']
   },
   {
@@ -51,7 +49,6 @@ export const activities = [
     difficulty: 'easy',
     durationSeconds: 120,
     prompts: ['Selecciona el número 2', 'Selecciona el número 3'],
-    correctIndices: [1, 2],
     options: ['1️⃣','2️⃣','3️⃣','4️⃣']
   }
 ];
@@ -83,6 +80,3 @@ export const mascotaConfig = {
 };
 
 export default { childProfiles, activities, sessions, mascotaConfig };
-if (typeof window !== 'undefined') {
-  window.dataMock = { childProfiles, activities, sessions, mascotaConfig };
-}

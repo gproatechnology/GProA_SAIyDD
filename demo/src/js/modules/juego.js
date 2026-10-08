@@ -1,7 +1,7 @@
 import mascota from './mascota.js';
 import { createMascotaBar, updateMascotaUI } from './mascota-ui.js';
-import data from '../data/data.js';
-import { escapeHtml, clampText, isSafeText } from '../utils/sanitize.js';
+import { api } from './api.js';
+import { clampText } from '../utils/sanitize.js';
 import { allowAction } from '../utils/rate-limiter.js';
 
 function renderPrompt(container, prompt, opts, onSelect) {
@@ -23,7 +23,7 @@ function renderPrompt(container, prompt, opts, onSelect) {
   container.appendChild(row);
 }
 
-function showResult(container, correct, correctIndex, mascotaUI) {
+function showResult(container, correct, correctAnswer, mascotaUI) {
   const msg = document.createElement('div');
   msg.className = 'juego-result';
   if (correct) {
@@ -32,7 +32,7 @@ function showResult(container, correct, correctIndex, mascotaUI) {
     mascota.setExpression('happy');
     mascota.say('¡Muy bien!', { pitch: 1.5 });
   } else {
-    msg.textContent = `Ups, la correcta era ${correctIndex}. Intenta de nuevo.`;
+    msg.textContent = correctAnswer ? `Ups, la correcta era ${correctAnswer}. Intenta de nuevo.` : 'Ups. Intenta de nuevo.';
     msg.className += ' juego-result--fail';
     mascota.setExpression('encourage');
     mascota.say('Ups, intenta de nuevo.', { pitch: 0.9 });
@@ -70,14 +70,14 @@ function saveSession(session) {
   }
 }
 
-export function showJuego({ app, activeChild, setView }) {
+export async function showJuego({ app, activeChild, setView }) {
   mascota.init();
   const section = document.createElement('section');
   section.className = 'screen screen--juego';
 
-  const activities = (window.dataMock?.activities || data.activities || []).filter(Boolean);
   const body = document.createElement('div');
   body.className = 'juego-body';
+  body.textContent = 'Cargando actividades…';
 
   const mascotaHeader = document.createElement('header');
   mascotaHeader.className = 'mascota-header';
@@ -86,6 +86,26 @@ export function showJuego({ app, activeChild, setView }) {
   const mascotaUI = createMascotaBar(mascotaHeader);
   updateMascotaUI(mascota, mascotaUI);
   mascotaUI.muteBtn.addEventListener('click', () => updateMascotaUI(mascota, mascotaUI));
+
+  const header = document.createElement('header');
+  header.innerHTML = `<h1>Juego</h1><button id="backBtn" type="button">Volver</button>`;
+  section.appendChild(header);
+  section.appendChild(body);
+  app.appendChild(section);
+
+  section.querySelector('#backBtn').addEventListener('click', () => { persistSession(); mascota.stop(); setView('menu'); });
+
+  let activities = [];
+  try {
+    activities = await api.getActivities();
+  } catch {
+    activities = [];
+  }
+
+  if (!activities.length) {
+    body.innerHTML = '<p>No pudimos cargar las actividades. Volvé al menú.</p>';
+    return;
+  }
 
   let activityIndex = 0;
   let step = 0;
@@ -142,27 +162,17 @@ export function showJuego({ app, activeChild, setView }) {
     const opts = act.options || [];
     renderPrompt(body, act.prompts[step], opts.map(o => typeof o === 'string' ? clampText(o) : o), (selectedIndex) => {
       if (!allowAction('juego-select', 20, 60000)) {
-        showResult(body, false, act.correctIndices ? act.correctIndices[step] : opts[step], mascotaUI);
+        showResult(body, false, null, mascotaUI);
         return;
       }
-      let correct = false;
-      if (act.type === 'memory') {
-        correct = opts[selectedIndex] === opts[step];
-      } else {
-        correct = selectedIndex === act.correctIndices[step];
-      }
-      if (correct) score++;
-      showResult(body, correct, act.correctIndices ? act.correctIndices[step] : opts[step], mascotaUI);
-      step++;
-      setTimeout(renderStep, 1200);
+      api.submitAnswer(act.id, step, selectedIndex).then(({ correct, correctOption }) => {
+        if (correct) score++;
+        showResult(body, correct, correctOption, mascotaUI);
+        step++;
+        setTimeout(renderStep, 1200);
+      });
     });
   }
 
-  const header = document.createElement('header');
-  header.innerHTML = `<h1>Juego</h1><button id="backBtn" type="button">Volver</button>`;
-  section.appendChild(header);
-  section.querySelector('#backBtn').addEventListener('click', () => { persistSession(); mascota.stop(); setView('menu'); });
-  section.appendChild(body);
   renderStep();
-  app.appendChild(section);
 }

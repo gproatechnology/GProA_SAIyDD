@@ -73,7 +73,7 @@ sequenceDiagram
 | `mascota-ui.js` | Componentes visuales de la mascota |
 | `voz.js` | Reconocimiento de voz limitado |
 | `dashboard.js` | Panel de progreso para tutores |
-| `api.js` | Adaptador mock preparado para un backend |
+| `api.js` | Puerta de acceso mock: datos públicos + `submitAnswer()` |
 | `blocks-world.js` | Actividad interactiva en canvas |
 | `sanitize.js` | Validación y saneamiento de texto |
 | `rate-limiter.js` | Límites locales por tipo de acción |
@@ -190,12 +190,13 @@ El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/de
 - El chat y las actividades usan respuestas preaprobadas; no hay generación libre.
 - La voz depende de APIs nativas del navegador y puede no estar disponible en todos los entornos.
 - El PIN del panel de padres se configura con la variable de entorno `VITE_SAIYDD_PIN` (ver `demo/.env.example`); el valor por defecto es solo para demo y no debe usarse en producción.
+- La demo ya no expone datos en globales (`window.dataMock` eliminado); las respuestas del juego se validan vía `api.submitAnswer()` y el cliente solo recibe el subconjunto público de cada actividad.
 - Antes de una publicación real se deben completar validaciones de seguridad, accesibilidad, moderación, consentimiento y privacidad infantil.
 
 ## Roadmap
 
 1. ✅ Consolidar en este repositorio la demo, documentación y configuración compartida.
-2. Corregir los hallazgos críticos de seguridad: PIN externalizado ✅, fuga de animación pendiente.
+2. ✅ Corregir los hallazgos críticos de seguridad (PIN externalizado + fuga de datos cerrada).
 3. Añadir pruebas automatizadas, linting y validación de accesibilidad.
 4. ✅ Instalar extensión Rojo + CLI y crear `default.project.json` + estructura Luau.
 5. ✅ Sincronizar Roblox Studio con Rojo (live sync verificado + `rojo build` funcional).
