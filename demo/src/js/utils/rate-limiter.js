@@ -2,10 +2,11 @@ const stores = new Map();
 
 export function allowAction(key, limit = 10, windowMs = 60000) {
   const now = Date.now();
-  const entry = stores.get(key) || { count: 0, resetAt: now + windowMs };
+  const entry = stores.get(key) || { count: 0, resetAt: now + windowMs, limit };
   if (now > entry.resetAt) {
     entry.count = 0;
     entry.resetAt = now + windowMs;
+    entry.limit = limit;
   }
   entry.count += 1;
   stores.set(key, entry);
@@ -20,5 +21,5 @@ export function getRemaining(key) {
     stores.delete(key);
     return 0;
   }
-  return Math.max(0, 10 - entry.count);
+  return Math.max(0, (entry.limit ?? 10) - entry.count);
 }

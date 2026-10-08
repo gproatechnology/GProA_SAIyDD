@@ -261,6 +261,8 @@ export function showBlocksWorld({ app, setView }) {
 
   const keys = new Set();
   const dirs = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] };
+  let rafId = null;
+  const btnTimers = new Set();
 
   function keyLoop() {
     for (const k of keys) {
@@ -271,28 +273,57 @@ export function showBlocksWorld({ app, setView }) {
         break;
       }
     }
-    requestAnimationFrame(keyLoop);
+    rafId = requestAnimationFrame(keyLoop);
   }
 
   section.addEventListener('keydown', (e) => { keys.add(e.key); });
   section.addEventListener('keyup', (e) => keys.delete(e.key));
-  requestAnimationFrame(keyLoop);
+  rafId = requestAnimationFrame(keyLoop);
 
+  const stopRepeat = (btn) => {
+    if (btn._timer != null) {
+      cancelAnimationFrame(btn._timer);
+      btnTimers.delete(btn._timer);
+      btn._timer = null;
+    }
+  };
   section.querySelectorAll('[data-dir]').forEach((btn) => {
     const repeat = () => {
       const d = btn.dataset.dir;
       const m = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[d];
       if (m) move(m[0], m[1]);
-      btn._timer = requestAnimationFrame(repeat);
       renderAll();
+      btn._timer = requestAnimationFrame(repeat);
+      btnTimers.add(btn._timer);
     };
-    btn.addEventListener('pointerdown', (e) => { e.preventDefault(); repeat(); });
-    btn.addEventListener('pointerup', () => cancelAnimationFrame(btn._timer));
-    btn.addEventListener('pointerleave', () => cancelAnimationFrame(btn._timer));
+    btn.addEventListener('pointerdown', (e) => { e.preventDefault(); stopRepeat(btn); repeat(); });
+    btn.addEventListener('pointerup', () => stopRepeat(btn));
+    btn.addEventListener('pointerleave', () => stopRepeat(btn));
   });
 
-  section.querySelector('#exitBlocks').addEventListener('click', () => {
+  const onStorage = () => {
+    const p = loadProgress();
+    if (p.levelIndex > levelIndex) {
+      levelIndex = p.levelIndex;
+      loadLevel();
+      renderAll();
+    }
+  };
+  window.addEventListener('storage', onStorage);
+
+  function cleanup() {
     keys.clear();
+    if (rafId != null) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    btnTimers.forEach((t) => cancelAnimationFrame(t));
+    btnTimers.clear();
+    window.removeEventListener('storage', onStorage);
+  }
+
+  section.querySelector('#exitBlocks').addEventListener('click', () => {
+    cleanup();
     setView('menu');
   });
 
@@ -307,15 +338,9 @@ export function showBlocksWorld({ app, setView }) {
   });
 
   section.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') setView('menu');
-  });
-
-  window.addEventListener('storage', () => {
-    const p = loadProgress();
-    if (p.levelIndex > levelIndex) {
-      levelIndex = p.levelIndex;
-      loadLevel();
-      renderAll();
+    if (e.key === 'Escape') {
+      cleanup();
+      setView('menu');
     }
   });
 

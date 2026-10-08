@@ -14,7 +14,7 @@ La demo web y la documentación ya están versionadas aquí:
 SAIyDD/
 ├── demo/           # Demo Vite completa (fuentes, assets, build config)
 ├── docs/           # Manual de usuario interactivo + datos
-└── rojo/           # Preparado para sincronización Rojo (pendiente default.project.json)
+└── rojo/           # Sincronización Rojo verificada (shared/server/client)
 ```
 
 ## Arquitectura
@@ -84,7 +84,6 @@ sequenceDiagram
 SAIyDD/
 ├── LICENSE
 ├── README.md
-├── SDD_SaIyDD.md          # Documento de Diseño de Software
 ├── demo/
 │   ├── index.html
 │   ├── package.json
@@ -123,10 +122,10 @@ SAIyDD/
 │   ├── manual.css
 │   └── data.js               # Contenido y renderizado del manual
 └── rojo/
-    ├── shared/               # ModuleScripts compartidos (pendiente)
-    ├── server/               # Scripts ServerScriptService (pendiente)
-    ├── client/               # Scripts StarterPlayerScripts (pendiente)
-    └── default.project.json  # Pendiente de crear
+    ├── shared/               # ModuleScripts compartidos
+    ├── server/               # Scripts ServerScriptService
+    ├── client/               # Scripts StarterPlayerScripts
+    └── default.project.json  # Árbol sincronizado con Studio
 ```
 
 ## Ejecución de la demo

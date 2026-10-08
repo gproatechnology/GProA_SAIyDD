@@ -16,7 +16,7 @@ const DOC_CONTENT = [
     title: 'Acceso (bienvenida)',
     html: `
       <ol class="steps">
-        <li>Abrí la demo de SaIyDD desde la web principal o directamente en <code>proyectos/saiydd/demo/</code>.</li>
+        <li>Abrí la demo de SaIyDD desde la web principal o directamente en la carpeta <code>demo/</code> del repositorio.</li>
         <li>En la pantalla de bienvenida, elegí tu <strong>avatar</strong> tocando uno de los botones grandes.</li>
         <li>Pulsá <strong>Empezar</strong> para ingresar al menú principal.</li>
       </ol>

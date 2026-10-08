@@ -73,10 +73,6 @@ export const mascotaConfig = {
   name: 'Orion',
   voice: { pitch: 1.3, rate: 0.9, lang: 'es-MX' },
   expressions: ['happy', 'encourage', 'neutral', 'surprise'],
-  animationSprites: {
-    happy: 'mascota_happy.webp',
-    encourage: 'mascota_encourage.webp'
-  }
 };
 
 export default { childProfiles, activities, sessions, mascotaConfig };
