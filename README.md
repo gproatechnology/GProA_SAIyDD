@@ -208,7 +208,7 @@ El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/de
 3. ✅ Añadir pruebas automatizadas (Vitest), linting (ESLint + Prettier), accesibilidad y CI (GitHub Actions).
 4. ✅ Instalar extensión Rojo + CLI y crear `default.project.json` + estructura Luau.
 5. ✅ Sincronizar Roblox Studio con Rojo (live sync verificado + `rojo build` funcional).
-6. ⏳ En progreso (etapa 1/4: esqueleto + contrato API con FastAPI).
+6. ⏳ En progreso (etapa 2/4: persistencia SQLModel + SQLite).
 7. Conectar Roblox Studio con el servicio compartido y validar el flujo completo.
 
 ## Licencia

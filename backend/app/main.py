@@ -1,13 +1,46 @@
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import Session
 
 from app.config import settings
-from app.schemas import ActivityPublic, HealthStatus
+from app.database import engine, get_session, init_db
+from app.models import ActivityModel
+from app.repositories import (
+    activity_exists,
+    child_exists,
+    create_child,
+    create_session,
+    get_child,
+    get_progress,
+    list_activities,
+)
+from app.seed import seed_activities
+from app.schemas import (
+    ActivityPublic,
+    ChildProfile,
+    ChildProfileCreate,
+    HealthStatus,
+    ProgressReport,
+    SessionRecord,
+    SessionRecordCreate,
+)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    init_db()
+    with Session(engine) as session:
+        seed_activities(session)
+    yield
+
 
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     description="API del Sistema de Aprendizaje Inclusivo (SaIyDD).",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -17,52 +50,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ACTIVITIES: list[ActivityPublic] = [
-    ActivityPublic(
-        id="act_001",
-        title="Sonidos de la granja",
-        type="listening",
-        category="naturaleza",
-        difficulty="easy",
-        duration_seconds=120,
-        prompts=['¿Qué animal hace "mu"?', '¿Qué animal hace "oink"?'],
-        audio_assets=["cow.mp3", "pig.mp3"],
-    ),
-    ActivityPublic(
-        id="act_002",
-        title="Colores del arcoíris",
-        type="visual",
-        category="artistica",
-        difficulty="easy",
-        duration_seconds=150,
-        prompts=["Selecciona el color rojo", "Selecciona el color azul"],
-        options=["🔴", "🟢", "🔵", "🟡"],
-    ),
-    ActivityPublic(
-        id="act_003",
-        title="Parejas de frutas",
-        type="memory",
-        category="cognitiva",
-        difficulty="easy",
-        duration_seconds=180,
-        prompts=[
-            "Encontrá la pareja de la manzana 🍎",
-            "Encontrá la pareja del plátano 🍌",
-        ],
-        options=["🍎", "🍌", "🍇", "🍊"],
-    ),
-    ActivityPublic(
-        id="act_004",
-        title="Números del 1 al 3",
-        type="visual",
-        category="matematica",
-        difficulty="easy",
-        duration_seconds=120,
-        prompts=["Selecciona el número 2", "Selecciona el número 3"],
-        options=["1️⃣", "2️⃣", "3️⃣", "4️⃣"],
-    ),
-]
-
 
 @app.get("/api/health", response_model=HealthStatus, tags=["meta"])
 def health() -> HealthStatus:
@@ -70,5 +57,75 @@ def health() -> HealthStatus:
 
 
 @app.get("/api/activities", response_model=list[ActivityPublic], tags=["actividades"])
-def list_activities() -> list[ActivityPublic]:
-    return ACTIVITIES
+def list_activities_endpoint(
+    session: Session = Depends(get_session),
+) -> list[ActivityPublic]:
+    return [
+        ActivityPublic(
+            id=item.id,
+            title=item.title,
+            type=item.type,
+            category=item.category,
+            difficulty=item.difficulty,
+            duration_seconds=item.duration_seconds,
+            prompts=item.prompts,
+            options=item.options,
+            audio_assets=item.audio_assets,
+        )
+        for item in list_activities(session)
+    ]
+
+
+@app.post(
+    "/api/children",
+    response_model=ChildProfile,
+    status_code=status.HTTP_201_CREATED,
+    tags=["niños"],
+)
+def create_child_endpoint(
+    data: ChildProfileCreate,
+    session: Session = Depends(get_session),
+) -> ChildProfile:
+    return create_child(session, data)
+
+
+@app.get("/api/children/{child_id}", response_model=ChildProfile, tags=["niños"])
+def get_child_endpoint(
+    child_id: str,
+    session: Session = Depends(get_session),
+) -> ChildProfile:
+    child = get_child(session, child_id)
+    if child is None:
+        raise HTTPException(status_code=404, detail="Niño no encontrado")
+    return child
+
+
+@app.post(
+    "/api/sessions",
+    response_model=SessionRecord,
+    status_code=status.HTTP_201_CREATED,
+    tags=["sesiones"],
+)
+def create_session_endpoint(
+    data: SessionRecordCreate,
+    session: Session = Depends(get_session),
+) -> SessionRecord:
+    if not child_exists(session, data.child_id):
+        raise HTTPException(status_code=404, detail="Niño no encontrado")
+    if not activity_exists(session, data.activity_id):
+        raise HTTPException(status_code=404, detail="Actividad no encontrada")
+    return create_session(session, data)
+
+
+@app.get(
+    "/api/children/{child_id}/progress",
+    response_model=ProgressReport,
+    tags=["progreso"],
+)
+def get_progress_endpoint(
+    child_id: str,
+    session: Session = Depends(get_session),
+) -> ProgressReport:
+    if not child_exists(session, child_id):
+        raise HTTPException(status_code=404, detail="Niño no encontrado")
+    return get_progress(session, child_id)
