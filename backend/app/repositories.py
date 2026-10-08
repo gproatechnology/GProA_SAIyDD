@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from sqlmodel import Session, select
 
-from app.models import ActivityModel, ChildModel, SessionModel
+from app.models import ActivityModel, ChildModel, SessionModel, TutorModel
 from app.schemas import (
     ChildPreferences,
     ChildProfile,
@@ -12,6 +12,8 @@ from app.schemas import (
     ProgressReport,
     SessionRecord,
     SessionRecordCreate,
+    TutorCreate,
+    TutorPublic,
 )
 
 
@@ -111,4 +113,43 @@ def to_session_record(record: SessionModel) -> SessionRecord:
         interactions=[InteractionRecord(**item) for item in record.interactions],
         started_at=record.started_at,
         finished_at=record.finished_at,
+    )
+
+
+def create_tutor(
+    session: Session, data: TutorCreate, password_hash: str
+) -> TutorPublic:
+    tutor = TutorModel(
+        id=new_id("tutor"),
+        email=data.email,
+        display_name=data.display_name,
+        password_hash=password_hash,
+        created_at=utcnow(),
+    )
+    session.add(tutor)
+    session.commit()
+    session.refresh(tutor)
+    return to_tutor_public(tutor)
+
+
+def get_tutor(session: Session, tutor_id: str) -> TutorModel | None:
+    return session.get(TutorModel, tutor_id)
+
+
+def get_tutor_by_email(session: Session, email: str) -> TutorModel | None:
+    return session.exec(
+        select(TutorModel).where(TutorModel.email == email)
+    ).first()
+
+
+def tutor_exists(session: Session, email: str) -> bool:
+    return get_tutor_by_email(session, email) is not None
+
+
+def to_tutor_public(tutor: TutorModel) -> TutorPublic:
+    return TutorPublic(
+        id=tutor.id,
+        email=tutor.email,
+        display_name=tutor.display_name,
+        created_at=tutor.created_at,
     )

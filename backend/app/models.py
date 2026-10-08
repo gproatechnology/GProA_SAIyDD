@@ -40,3 +40,13 @@ class SessionModel(SQLModel, table=True):
     interactions: list = Field(default_factory=list, sa_column=Column(JSON))
     started_at: datetime
     finished_at: datetime
+
+
+class TutorModel(SQLModel, table=True):
+    __tablename__ = "tutors"
+
+    id: str = Field(primary_key=True)
+    email: str = Field(index=True, unique=True)
+    display_name: str
+    password_hash: str
+    created_at: datetime

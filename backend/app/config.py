@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str = "sqlite:///./saiydd.db"
     cors_origins: str = "http://localhost:5174"
+    jwt_secret: str = "dev-secret-cambiar-en-produccion"
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
 
     @property
     def cors_origins_list(self) -> list[str]:

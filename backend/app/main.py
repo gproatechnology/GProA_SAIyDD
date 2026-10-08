@@ -1,20 +1,32 @@
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlmodel import Session
 
+from app.auth import (
+    create_access_token,
+    hash_password,
+    require_tutor,
+    verify_password,
+)
 from app.config import settings
 from app.database import engine, get_session, init_db
-from app.models import ActivityModel
+from app.errors import register_error_handlers
+from app.models import ActivityModel, TutorModel
 from app.repositories import (
     activity_exists,
     child_exists,
     create_child,
     create_session,
+    create_tutor,
     get_child,
     get_progress,
+    get_tutor_by_email,
     list_activities,
+    tutor_exists,
 )
 from app.seed import seed_activities
 from app.schemas import (
@@ -22,10 +34,16 @@ from app.schemas import (
     ChildProfile,
     ChildProfileCreate,
     HealthStatus,
+    LoginRequest,
     ProgressReport,
     SessionRecord,
     SessionRecordCreate,
+    TokenResponse,
+    TutorCreate,
+    TutorPublic,
 )
+
+limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager
@@ -49,6 +67,8 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+app.state.limiter = limiter
+register_error_handlers(app)
 
 
 @app.get("/api/health", response_model=HealthStatus, tags=["meta"])
@@ -84,6 +104,7 @@ def list_activities_endpoint(
 )
 def create_child_endpoint(
     data: ChildProfileCreate,
+    tutor: TutorModel = Depends(require_tutor),
     session: Session = Depends(get_session),
 ) -> ChildProfile:
     return create_child(session, data)
@@ -92,6 +113,7 @@ def create_child_endpoint(
 @app.get("/api/children/{child_id}", response_model=ChildProfile, tags=["niños"])
 def get_child_endpoint(
     child_id: str,
+    tutor: TutorModel = Depends(require_tutor),
     session: Session = Depends(get_session),
 ) -> ChildProfile:
     child = get_child(session, child_id)
@@ -108,6 +130,7 @@ def get_child_endpoint(
 )
 def create_session_endpoint(
     data: SessionRecordCreate,
+    tutor: TutorModel = Depends(require_tutor),
     session: Session = Depends(get_session),
 ) -> SessionRecord:
     if not child_exists(session, data.child_id):
@@ -124,8 +147,45 @@ def create_session_endpoint(
 )
 def get_progress_endpoint(
     child_id: str,
+    tutor: TutorModel = Depends(require_tutor),
     session: Session = Depends(get_session),
 ) -> ProgressReport:
     if not child_exists(session, child_id):
         raise HTTPException(status_code=404, detail="Niño no encontrado")
     return get_progress(session, child_id)
+
+
+@app.post(
+    "/api/auth/register",
+    response_model=TutorPublic,
+    status_code=status.HTTP_201_CREATED,
+    tags=["auth"],
+)
+@limiter.limit("5/hour")
+def register_endpoint(
+    request: Request,
+    data: TutorCreate,
+    session: Session = Depends(get_session),
+) -> TutorPublic:
+    if tutor_exists(session, data.email):
+        raise HTTPException(
+            status_code=409, detail="El tutor ya está registrado"
+        )
+    return create_tutor(session, data, hash_password(data.password))
+
+
+@app.post("/api/auth/login", response_model=TokenResponse, tags=["auth"])
+@limiter.limit("10/minute")
+def login_endpoint(
+    request: Request,
+    data: LoginRequest,
+    session: Session = Depends(get_session),
+) -> TokenResponse:
+    tutor = get_tutor_by_email(session, data.email)
+    if tutor is None or not verify_password(data.password, tutor.password_hash):
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
+    token = create_access_token(tutor.id)
+    return TokenResponse(
+        access_token=token,
+        expires_in=settings.access_token_expire_minutes * 60,
+    )

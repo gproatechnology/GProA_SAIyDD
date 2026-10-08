@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.alias_generators import to_camel
 
 
@@ -75,3 +75,41 @@ class ProgressReport(CamelModel):
 class HealthStatus(CamelModel):
     status: str
     version: str
+
+
+def _normalize_email(value: str) -> str:
+    return value.strip().lower()
+
+
+class TutorCreate(CamelModel):
+    email: str = Field(min_length=3, max_length=254)
+    display_name: str = Field(min_length=1, max_length=40)
+    password: str = Field(min_length=8, max_length=72)
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        return _normalize_email(value)
+
+
+class TutorPublic(CamelModel):
+    id: str
+    email: str
+    display_name: str
+    created_at: datetime
+
+
+class LoginRequest(CamelModel):
+    email: str = Field(min_length=3, max_length=254)
+    password: str = Field(min_length=1, max_length=72)
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        return _normalize_email(value)
+
+
+class TokenResponse(CamelModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int = Field(ge=1)

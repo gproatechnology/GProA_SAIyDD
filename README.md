@@ -84,6 +84,10 @@ sequenceDiagram
 SAIyDD/
 ├── LICENSE
 ├── README.md
+├── backend/        # API FastAPI (Python) — venv, .env y *.db ignorados
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── app/        # main, auth, errors, repositories, models, schemas, seed
 ├── demo/
 │   ├── index.html
 │   ├── package.json
@@ -155,6 +159,19 @@ npm run format:check  # Prettier (verifica)
 npm test              # Vitest (19 pruebas)
 ```
 
+## Backend (API)
+
+```powershell
+cd backend
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+- Auth de tutores: `POST /api/auth/register` y `POST /api/auth/login` (bcrypt + JWT HS256, token Bearer con `role`).
+- Rutas de dominio protegidas con la dependencia `require_tutor` (401 sin/Con token inválido, 403 con rol insuficiente); `/api/health` y `/api/activities` son públicas.
+- Rate limiting con slowapi (login 10/min, registro 5/hora) y errores con formato `{"error": {"code", "message"}}`.
+- Configuración vía variables de entorno (ver `backend/.env.example`), incluye `JWT_SECRET`.
+
 ## Manual de usuario
 
 Abrir `docs/manual-usuario.html` en el navegador (o servir con `npx serve docs`). Incluye:
@@ -187,7 +204,7 @@ flowchart TB
 | Rojo (extensión + CLI) | ✅ Instalado y configurado |
 | Proyecto Roblox (`default.project.json`) | ✅ Completado |
 | Pruebas, linting y accesibilidad | ✅ Completados |
-| Backend seguro | ⏳ Pendiente |
+| Backend seguro | ⏳ En progreso (auth de tutores con bcrypt + JWT) |
 | Accesibilidad y seguridad productiva | ⏳ Pendiente |
 
 El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/default.project.json` y la estructura `shared/server/client` para Luau. **Completado**.
@@ -199,6 +216,7 @@ El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/de
 - La voz depende de APIs nativas del navegador y puede no estar disponible en todos los entornos.
 - El PIN del panel de padres se configura con la variable de entorno `VITE_SAIYDD_PIN` (ver `demo/.env.example`); el valor por defecto es solo para demo y no debe usarse en producción.
 - La demo ya no expone datos en globales (`window.dataMock` eliminado); las respuestas del juego se validan vía `api.submitAnswer()` y el cliente solo recibe el subconjunto público de cada actividad.
+- La API del backend protege las rutas de tutor con JWT (registro/login con bcrypt, rate limiting con slowapi, errores estandarizados); el secreto se configura con `JWT_SECRET` (ver `backend/.env.example`).
 - Antes de una publicación real se deben completar validaciones de seguridad, accesibilidad, moderación, consentimiento y privacidad infantil.
 
 ## Roadmap
@@ -208,7 +226,7 @@ El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/de
 3. ✅ Añadir pruebas automatizadas (Vitest), linting (ESLint + Prettier), accesibilidad y CI (GitHub Actions).
 4. ✅ Instalar extensión Rojo + CLI y crear `default.project.json` + estructura Luau.
 5. ✅ Sincronizar Roblox Studio con Rojo (live sync verificado + `rojo build` funcional).
-6. ⏳ En progreso (etapa 2/4: persistencia SQLModel + SQLite).
+6. ⏳ En progreso (etapa 3/4: auth de tutores y seguridad).
 7. Conectar Roblox Studio con el servicio compartido y validar el flujo completo.
 
 ## Licencia
