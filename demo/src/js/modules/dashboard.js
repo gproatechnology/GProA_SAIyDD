@@ -35,11 +35,13 @@ function formatTime(seconds) {
   return `${m}m ${s.toString().padStart(2, '0')}s`;
 }
 
-const PIN_DEFAULT = '1234';
+import { validatePin, PIN_FROM_ENV } from '../config.js';
+
 function askPin() {
-  const code = prompt('Ingresá el PIN de padres (demo: 1234):');
+  const hint = PIN_FROM_ENV ? '' : ' (demo)';
+  const code = prompt(`Ingresá el PIN de padres${hint}:`);
   if (code === null) return false;
-  return String(code).trim() === PIN_DEFAULT;
+  return validatePin(code);
 }
 
 export function showDashboard({ app, setView }) {

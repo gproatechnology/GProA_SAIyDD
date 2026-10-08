@@ -1,8 +1,6 @@
 import mascota from './mascota.js';
 import { createMascotaBar, updateMascotaUI } from './mascota-ui.js';
 
-const PIN_DEFAULT = '1234';
-
 export function showBienvenida({ app, setView, saveProfile }) {
   const card = document.createElement('section');
   card.className = 'screen screen--bienvenida screen--login';

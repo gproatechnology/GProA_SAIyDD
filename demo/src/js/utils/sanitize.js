@@ -1,6 +1,6 @@
 export function escapeHtml(str) {
   if (typeof str !== 'string') return '';
-  return str.replace(/[&<>"']/g, (m) => ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' }[m] || m));
+  return str.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m] || m));
 }
 
 export function clampText(text, max = 200) {

@@ -189,13 +189,13 @@ El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/de
 - Los datos de perfil y progreso se guardan en `localStorage` del navegador.
 - El chat y las actividades usan respuestas preaprobadas; no hay generación libre.
 - La voz depende de APIs nativas del navegador y puede no estar disponible en todos los entornos.
-- El PIN mostrado en la demo es únicamente de prueba (`1234`) y no debe utilizarse en producción.
+- El PIN del panel de padres se configura con la variable de entorno `VITE_SAIYDD_PIN` (ver `demo/.env.example`); el valor por defecto es solo para demo y no debe usarse en producción.
 - Antes de una publicación real se deben completar validaciones de seguridad, accesibilidad, moderación, consentimiento y privacidad infantil.
 
 ## Roadmap
 
 1. ✅ Consolidar en este repositorio la demo, documentación y configuración compartida.
-2. Corregir los hallazgos críticos de seguridad, el PIN de prueba y la fuga de animación.
+2. Corregir los hallazgos críticos de seguridad: PIN externalizado ✅, fuga de animación pendiente.
 3. Añadir pruebas automatizadas, linting y validación de accesibilidad.
 4. ✅ Instalar extensión Rojo + CLI y crear `default.project.json` + estructura Luau.
 5. ✅ Sincronizar Roblox Studio con Rojo (live sync verificado + `rojo build` funcional).
