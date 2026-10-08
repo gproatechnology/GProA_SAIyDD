@@ -38,8 +38,8 @@ flowchart LR
     G --> L
     A --> API[api.js - mock o backend]
     API -- VITE_SAIYDD_API_URL --> BE[(Backend FastAPI)]
-    BE <--> R[Roblox Studio]
-    R <--> ROJO[Rojo]
+    X[Roblox Studio] -- HttpService --> BE
+    X <--> ROJO[Rojo sync]
 ```
 
 ### Flujo principal
@@ -129,11 +129,13 @@ SAIyDD/
 │   ├── manual-usuario.html   # Manual interactivo con búsqueda, TOC, tema
 │   ├── manual.css
 │   └── data.js               # Contenido y renderizado del manual
+├── rojo-manager.ps1        # Gestor interactivo: Rojo + backend + flujo completo
 └── rojo/
-    ├── shared/               # ModuleScripts compartidos
-    ├── server/               # Scripts ServerScriptService
-    ├── client/               # Scripts StarterPlayerScripts
-    └── default.project.json  # Árbol sincronizado con Studio
+    ├── shared/               # init.lua: contrato compartido (sin secretos)
+    ├── server/               # main.lua (HttpService + JWT) + secrets.lua (ignorado)
+    ├── client/               # main.lua: bridge cliente (RemoteEvents)
+    ├── default.project.json  # Árbol sincronizado con Studio (incluye Events)
+    └── secrets.example.lua   # Plantilla de credenciales del servicio
 ```
 
 ## Ejecución de la demo
@@ -160,7 +162,7 @@ Calidad de código:
 npm run lint          # ESLint
 npm run format        # Prettier (escribe)
 npm run format:check  # Prettier (verifica)
-npm test              # Vitest (19 pruebas)
+npm test              # Vitest (26 pruebas)
 ```
 
 ## Backend (API)
@@ -177,6 +179,7 @@ cd backend
 - Configuración vía variables de entorno (ver `backend/.env.example`), incluye `JWT_SECRET`.
 - La demo se conecta al backend real configurando `VITE_SAIYDD_API_URL` y `VITE_SAIYDD_API_TOKEN` (ver `demo/.env.example`); sin esas variables usa su mock local. `submitAnswer` sigue siendo local: las respuestas son preaprobadas y no existe endpoint de validación.
 - Pruebas del backend: `pytest` (14 pruebas con `httpx`/TestClient en `backend/tests/`); lint con `ruff`. Ambos corren en CI (job `backend`).
+- La cuenta de servicio de Roblox se registra con `POST /api/auth/register` (o con la opción 8 de `rojo-manager.ps1`); sus credenciales viven en `rojo/server/secrets.lua` (ignorado por git).
 
 ## Manual de usuario
 
@@ -199,6 +202,56 @@ flowchart TB
     ROJO[Rojo sync] --> STUDIO
 ```
 
+### Flujo Studio ↔ backend
+
+```mermaid
+sequenceDiagram
+    participant C as Client (LocalScript)
+    participant S as Server (Script)
+    participant B as Backend FastAPI
+    C->>S: RemoteEvent SAIyDDRecordSession
+    S->>B: POST /api/sessions (Bearer JWT)
+    B-->>S: 201 + sesión registrada
+    S-->>C: respuesta por RemoteEvent
+```
+
+- `rojo/shared/init.lua`: contrato compartido (endpoints, payloads, RemoteEvents) — sin secretos.
+- `rojo/server/main.lua`: cliente HTTP (`HttpService:RequestAsync`), login de cuenta de servicio con cache de JWT y relogin ante 401, handlers de los RemoteEvents.
+- `rojo/client/main.lua`: bridge cliente (`Client.recordSession` / `Client.healthCheck`, corrutinas con timeout).
+- `rojo/server/secrets.lua`: credenciales del servicio (ignorado por git; plantilla en `rojo/secrets.example.lua`).
+
+### Uso con `rojo-manager.ps1`
+
+```powershell
+.\rojo-manager.ps1
+# [7] Iniciar/detener backend (uvicorn :8000)
+# [8] Flujo completo: cuenta de servicio + niño de prueba + sesión + progreso
+# [9] Estado integral (puertos, Rojo, backend, árbol sincronizado)
+```
+
+La opción 8 guarda `{apiUrl, token, childId}` en `%TEMP%\saiydd-state.json` para la prueba manual en Studio.
+
+### Prueba en vivo en Studio (manual)
+
+1. Studio → **Game Settings → Security → Allow HTTP Requests = ON**.
+2. `rojo serve rojo\default.project.json --port 34872` (o opción 1 del gestor) → Studio: **Plugins → Rojo → Connect to Rojo**.
+3. **Play (F5)**: en Output aparecen los mensajes `[SaIyDD]` de handlers y servicio.
+4. Durante el Play, un LocalScript temporal en StarterPlayerScripts:
+
+   ```lua
+   local Client = require(script.Parent:WaitForChild("Client"))
+   task.spawn(function()
+       local reply = Client.recordSession("child_ID_AQUI", "act_001", 100, 90)
+       print("[TEST] recordSession ->", reply.ok)
+   end)
+   ```
+
+5. Verificar la persistencia compartida:
+
+   ```powershell
+   curl.exe -H "Authorization: Bearer $token" http://127.0.0.1:8000/api/children/$childId/progress
+   ```
+
 ### Preparación actual
 
 | Elemento | Estado |
@@ -209,11 +262,12 @@ flowchart TB
 | Roblox Studio | ✅ Instalado localmente |
 | Rojo (extensión + CLI) | ✅ Instalado y configurado |
 | Proyecto Roblox (`default.project.json`) | ✅ Completado |
+| Servicio Roblox (Luau + RemoteEvents) | ✅ Contrato, cliente HTTP y bridge |
+| Backend + auth de tutores | ✅ SQLModel, bcrypt + JWT, tests y CI |
 | Pruebas, linting y accesibilidad | ✅ Completados |
-| Backend seguro | ⏳ En progreso (auth de tutores con bcrypt + JWT) |
 | Accesibilidad y seguridad productiva | ⏳ Pendiente |
 
-El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/default.project.json` y la estructura `shared/server/client` para Luau. **Completado**.
+La sincronización Rojo, el backend y la integración Studio ↔ backend están verificados (`rojo build`, `rojo serve`, flujo API de extremo a extremo). Pendiente: la prueba de Play en Studio (ver "Prueba en vivo en Studio").
 
 ## Seguridad y alcance de la demo
 
@@ -223,6 +277,7 @@ El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/de
 - El PIN del panel de padres se configura con la variable de entorno `VITE_SAIYDD_PIN` (ver `demo/.env.example`); el valor por defecto es solo para demo y no debe usarse en producción.
 - La demo ya no expone datos en globales (`window.dataMock` eliminado); las respuestas del juego se validan vía `api.submitAnswer()` y el cliente solo recibe el subconjunto público de cada actividad.
 - La API del backend protege las rutas de tutor con JWT (registro/login con bcrypt, rate limiting con slowapi, errores estandarizados); el secreto se configura con `JWT_SECRET` (ver `backend/.env.example`).
+- La integración Roblox usa una cuenta de servicio de tutor: las credenciales viven en `rojo/server/secrets.lua` (ignorado por git) y el JWT solo existe en ServerScriptService, nunca en el cliente.
 - Antes de una publicación real se deben completar validaciones de seguridad, accesibilidad, moderación, consentimiento y privacidad infantil.
 
 ## Roadmap
@@ -232,8 +287,8 @@ El siguiente paso técnico fue instalar la extensión Rojo + CLI, crear `rojo/de
 3. ✅ Añadir pruebas automatizadas (Vitest), linting (ESLint + Prettier), accesibilidad y CI (GitHub Actions).
 4. ✅ Instalar extensión Rojo + CLI y crear `default.project.json` + estructura Luau.
 5. ✅ Sincronizar Roblox Studio con Rojo (live sync verificado + `rojo build` funcional).
-6. ⏳ En progreso (etapa 4/4: integración, tests y CI).
-7. Conectar Roblox Studio con el servicio compartido y validar el flujo completo.
+6. ✅ Backend: persistencia SQLModel, auth de tutores (bcrypt + JWT), integración demo↔backend, tests y CI.
+7. ⏳ En progreso: Roblox Studio ↔ backend vía Rojo (contrato, cliente HTTP con JWT, RemoteEvents, `rojo-manager.ps1` extendido). Pendiente: prueba de Play en Studio (ver "Integración con Roblox").
 
 ## Licencia
 
