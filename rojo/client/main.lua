@@ -72,7 +72,7 @@ local function callServer(name: string, payload: any?): Shared.RemoteReply
 	end)
 
 	local reply: any = coroutine.yield()
-	timer:Cancel()
+	pcall(task.cancel, timer)
 	return reply
 end
 
