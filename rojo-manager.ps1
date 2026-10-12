@@ -139,7 +139,7 @@ function Stop-Backend {
     $script:backendPid = $null
 }
 
-function Toggle-Backend {
+function Switch-Backend {
     if (Get-BackendListener) {
         Stop-Backend
     } else {
@@ -330,14 +330,17 @@ function Start-RojoServer {
 
 function Stop-RojoServer {
     Write-Host "`n[*] Deteniendo servidores Rojo..." -ForegroundColor Yellow
-    $found = $false
-    Get-Process -Name "rojo" -ErrorAction SilentlyContinue | ForEach-Object {
-        Write-Host "[i] Matando PID: $($_.Id)" -ForegroundColor Cyan
-        Stop-Process -Id $_.Id -Force
-        $found = $true
+    $procs = Get-Process -Name "rojo" -ErrorAction SilentlyContinue
+    if ($procs) {
+        $procs | ForEach-Object {
+            Write-Host "[i] Matando PID: $($_.Id)" -ForegroundColor Cyan
+            Stop-Process -Id $_.Id -Force
+        }
+        Write-Host "[OK] Detenidos" -ForegroundColor Green
     }
-    if ($found) { Write-Host "[OK] Detenidos" -ForegroundColor Green }
-    else { Write-Host "[i] No habia procesos rojo.exe" -ForegroundColor Gray }
+    else {
+        Write-Host "[i] No habia procesos rojo.exe" -ForegroundColor Gray
+    }
     $script:rojoPid = $null
     Read-Enter
 }
@@ -424,7 +427,7 @@ try {
             "4" { Show-Ports }
             "5" { Set-Port -P $portRef }
             "6" { Test-Connection -P $portRef.Value }
-            "7" { Toggle-Backend }
+            "7" { Switch-Backend }
             "8" { Invoke-FullFlow }
             "9" { Show-FullStatus }
             "Q" { Write-Host "`n[!] Saliendo..." -ForegroundColor Gray; $running = $false }
