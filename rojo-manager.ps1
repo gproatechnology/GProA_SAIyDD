@@ -241,12 +241,12 @@ function Invoke-FullFlow {
 function Show-FullStatus {
     Write-Host "`n[*] Estado integral" -ForegroundColor Yellow
 
-    foreach ($port in @($Port, $BACKEND_PORT)) {
-        $conn = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+    foreach ($p in @($Port, $BACKEND_PORT)) {
+        $conn = Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($conn) {
-            Write-Host "  [OK] Puerto $port escuchando (PID $($conn.OwningProcess))" -ForegroundColor Green
+            Write-Host "  [OK] Puerto $p escuchando (PID $($conn.OwningProcess))" -ForegroundColor Green
         } else {
-            Write-Host "  [--] Puerto $port libre" -ForegroundColor Gray
+            Write-Host "  [--] Puerto $p libre" -ForegroundColor Gray
         }
     }
 
