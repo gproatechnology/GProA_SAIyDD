@@ -132,7 +132,7 @@ SAIyDD/
 ├── rojo-manager.ps1        # Gestor interactivo: Rojo + backend + flujo completo
 └── rojo/
     ├── shared/               # init.lua: contrato compartido (sin secretos)
-    ├── server/               # main.lua (HttpService + JWT) + secrets.lua (ignorado)
+    ├── server/               # main.server.lua (Script: HttpService + JWT) + secrets.lua (ignorado)
     ├── client/               # main.lua: bridge cliente (RemoteEvents)
     ├── default.project.json  # Árbol sincronizado con Studio (incluye Events)
     └── secrets.example.lua   # Plantilla de credenciales del servicio
@@ -216,7 +216,7 @@ sequenceDiagram
 ```
 
 - `rojo/shared/init.lua`: contrato compartido (endpoints, payloads, RemoteEvents) — sin secretos.
-- `rojo/server/main.lua`: cliente HTTP (`HttpService:RequestAsync`), login de cuenta de servicio con cache de JWT y relogin ante 401, handlers de los RemoteEvents.
+- `rojo/server/main.server.lua`: Script del servidor (arranca solo al abrir el place) — cliente HTTP (`HttpService:RequestAsync`), login de cuenta de servicio con cache de JWT y relogin ante 401, handlers de los RemoteEvents.
 - `rojo/client/main.lua`: bridge cliente (`Client.recordSession` / `Client.healthCheck`, corrutinas con timeout).
 - `rojo/server/secrets.lua`: credenciales del servicio (ignorado por git; plantilla en `rojo/secrets.example.lua`).
 
@@ -233,10 +233,14 @@ La opción 8 guarda `{apiUrl, token, childId}` en `%TEMP%\saiydd-state.json` par
 
 ### Prueba en vivo en Studio (manual)
 
-1. Studio → **Game Settings → Security → Allow HTTP Requests = ON**.
-2. `rojo serve rojo\default.project.json --port 34872` (o opción 1 del gestor) → Studio: **Plugins → Rojo → Connect to Rojo**.
-3. **Play (F5)**: en Output aparecen los mensajes `[SaIyDD]` de handlers y servicio.
-4. Durante el Play, un LocalScript temporal en StarterPlayerScripts:
+**Requisitos de Studio:**
+
+1. **HTTP habilitado**: Game Settings → Security → **Allow HTTP Requests = ON** (equivalente por código: `HttpService.HttpEnabled = true`; se guarda con el place y persiste en los play tests). Sin esto, `HttpService:RequestAsync` falla con `HTTP 0` y el login contra el backend devuelve `auth_failed`.
+2. **Orden de arranque**: backend (opción 7 del gestor o uvicorn) → Rojo (opción 1) → Studio: Plugins → Rojo → Connect → **Play (F5)**.
+
+Pasos de la prueba:
+
+1. Durante el Play, un LocalScript temporal en StarterPlayerScripts:
 
    ```lua
    local Client = require(script.Parent:WaitForChild("Client"))
@@ -246,7 +250,7 @@ La opción 8 guarda `{apiUrl, token, childId}` en `%TEMP%\saiydd-state.json` par
    end)
    ```
 
-5. Verificar la persistencia compartida:
+2. Verificar la persistencia compartida:
 
    ```powershell
    curl.exe -H "Authorization: Bearer $token" http://127.0.0.1:8000/api/children/$childId/progress
@@ -262,12 +266,12 @@ La opción 8 guarda `{apiUrl, token, childId}` en `%TEMP%\saiydd-state.json` par
 | Roblox Studio | ✅ Instalado localmente |
 | Rojo (extensión + CLI) | ✅ Instalado y configurado |
 | Proyecto Roblox (`default.project.json`) | ✅ Completado |
-| Servicio Roblox (Luau + RemoteEvents) | ✅ Contrato, cliente HTTP y bridge |
+| Servicio Roblox (Luau + RemoteEvents) | ✅ Contrato, cliente HTTP, bridge y play test validado |
 | Backend + auth de tutores | ✅ SQLModel, bcrypt + JWT, tests y CI |
 | Pruebas, linting y accesibilidad | ✅ Completados |
 | Accesibilidad y seguridad productiva | ⏳ Pendiente |
 
-La sincronización Rojo, el backend y la integración Studio ↔ backend están verificados (`rojo build`, `rojo serve`, flujo API de extremo a extremo). Pendiente: la prueba de Play en Studio (ver "Prueba en vivo en Studio").
+La sincronización Rojo, el backend y la integración Studio ↔ backend están verificados (`rojo build`, `rojo serve`, flujo API de extremo a extremo), incluyendo la prueba de Play en Studio con registro real de sesión en el backend (`Client.recordSession` → RemoteEvent → Script del servidor → `POST /api/sessions` → 201).
 
 ## Seguridad y alcance de la demo
 
@@ -288,7 +292,7 @@ La sincronización Rojo, el backend y la integración Studio ↔ backend están 
 4. ✅ Instalar extensión Rojo + CLI y crear `default.project.json` + estructura Luau.
 5. ✅ Sincronizar Roblox Studio con Rojo (live sync verificado + `rojo build` funcional).
 6. ✅ Backend: persistencia SQLModel, auth de tutores (bcrypt + JWT), integración demo↔backend, tests y CI.
-7. ⏳ En progreso: Roblox Studio ↔ backend vía Rojo (contrato, cliente HTTP con JWT, RemoteEvents, `rojo-manager.ps1` extendido). Pendiente: prueba de Play en Studio (ver "Integración con Roblox").
+7. ✅ Roblox Studio ↔ backend vía Rojo (contrato, cliente HTTP con JWT, RemoteEvents, `rojo-manager.ps1` extendido). Play test en Studio validado end-to-end (ver "Integración con Roblox").
 
 ## Licencia
 
