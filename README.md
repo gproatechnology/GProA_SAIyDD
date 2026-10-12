@@ -293,6 +293,7 @@ La sincronización Rojo, el backend y la integración Studio ↔ backend están 
 5. ✅ Sincronizar Roblox Studio con Rojo (live sync verificado + `rojo build` funcional).
 6. ✅ Backend: persistencia SQLModel, auth de tutores (bcrypt + JWT), integración demo↔backend, tests y CI.
 7. ✅ Roblox Studio ↔ backend vía Rojo (contrato, cliente HTTP con JWT, RemoteEvents, `rojo-manager.ps1` extendido). Play test en Studio validado end-to-end (ver "Integración con Roblox").
+8. ⏳ Preparación para producción: validaciones de seguridad, accesibilidad, moderación, consentimiento y privacidad infantil; demo web contra backend real (`VITE_SAIYDD_API_URL` + `VITE_SAIYDD_API_TOKEN`); publicación del place de Roblox.
 
 ## Licencia
 
