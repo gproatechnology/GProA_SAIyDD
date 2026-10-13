@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="manual.css">
 </head>
 <body>
+    <a href="#inicio" class="skip-link">Saltar a la documentación principal</a>
     <div class="wrap">
         <header>
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
@@ -25,16 +26,16 @@
         </header>
 
         <div class="topbar">
-            <input id="search" type="text" placeholder="Buscar en la documentación...">
+            <input id="search" type="text" placeholder="Buscar en la documentación..." aria-label="Buscar en la documentación">
             <a href="#inicio">Volver arriba</a>
         </div>
 
         <div class="layout">
-            <aside class="toc" id="toc">
+            <aside class="toc" id="toc" aria-label="Tabla de contenidos de la documentación">
                 <h4>Contenido</h4>
             </aside>
 
-            <article class="doc" id="inicio">
+            <article class="doc" id="inicio" role="main">
                 <div id="docLoader" style="color:var(--text-muted);">Cargando documentación...</div>
             </article>
             <div id="noResults" class="note hidden">No se encontraron resultados para tu búsqueda.</div>

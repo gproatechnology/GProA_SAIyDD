@@ -31,13 +31,13 @@ export function showChatbot({ app, setView }) {
     <header>
       <h1>Asistente</h1>
       <div class="mascota-bar"></div>
-      <button id="backBtn" type="button">Volver</button>
-      <button id="micBtn" type="button" aria-label="Micrófono">🎤</button>
+      <button id="backBtn" type="button" aria-label="Volver al menú principal">Volver</button>
+      <button id="micBtn" type="button" aria-label="Activar o desactivar dictado por voz"><span aria-hidden="true">🎤</span></button>
     </header>
-    <div class="chat" id="chat" aria-live="polite"></div>
+    <div class="chat" id="chat" role="log" aria-live="polite" aria-label="Historial de conversación con Orion"></div>
     <div class="chat-input">
       <input id="chatInput" type="text" placeholder="Escribe o usá el micrófono" aria-label="Escribí tu mensaje" autocomplete="off" />
-      <button id="sendBtn" type="button" aria-label="Enviar">Enviar</button>
+      <button id="sendBtn" type="button" aria-label="Enviar mensaje">Enviar</button>
     </div>
   `;
 
@@ -45,6 +45,11 @@ export function showChatbot({ app, setView }) {
   const addMsg = (text, who = "bot") => {
     const d = document.createElement("div");
     d.className = `chat-msg chat-msg--${who}`;
+    d.setAttribute("role", "article");
+    d.setAttribute(
+      "aria-label",
+      who === "bot" ? `Orion dice: ${text}` : `Tú dijiste: ${text}`,
+    );
     d.textContent = text;
     chat.appendChild(d);
     chat.scrollTop = chat.scrollHeight;

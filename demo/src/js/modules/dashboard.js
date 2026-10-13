@@ -51,12 +51,12 @@ export function showDashboard({ app, setView }) {
     <header>
       <h1>Panel de padres</h1>
       <div class="mascota-bar"></div>
-      <button id="backBtn" type="button">Volver</button>
+      <button id="backBtn" type="button" aria-label="Volver al menú principal">Volver</button>
     </header>
-    <div class="dashboard" id="dashboard"></div>
-    <div class="dashboard-actions">
-      <button id="exportBtn" type="button">Exportar JSON</button>
-      <button id="resetBtn" type="button" style="background:#ef476f;color:#fff;">Borrar progreso</button>
+    <div class="dashboard" id="dashboard" role="region" aria-label="Resumen de progreso del niño"></div>
+    <div class="dashboard-actions" role="group" aria-label="Acciones del panel">
+      <button id="exportBtn" type="button" aria-label="Exportar datos de progreso en formato JSON">Exportar JSON</button>
+      <button id="resetBtn" type="button" aria-label="Borrar historial y progreso acumulado" style="background:#ef476f;color:#fff;">Borrar progreso</button>
     </div>
   `;
 
@@ -96,7 +96,8 @@ export function showDashboard({ app, setView }) {
 
   const granted = askPin();
   if (!granted) {
-    dash.innerHTML = "<p>Acceso restringido. Volvé cuando tengas el PIN.</p>";
+    dash.innerHTML =
+      '<p role="alert">Acceso restringido. Volvé cuando tengas el PIN.</p>';
     section
       .querySelector("#backBtn")
       .addEventListener("click", () => setView("menu"));

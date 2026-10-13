@@ -153,6 +153,28 @@ video {
   border: 0;
 }
 
+.skip-link {
+  position: absolute;
+  top: -120px;
+  left: var(--space-md);
+  background: var(--color-accent);
+  color: #fff;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  z-index: 10000;
+  transition: top 0.2s ease;
+  text-decoration: none;
+  box-shadow: var(--shadow-md);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: var(--space-md);
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
 .screen[tabindex="-1"]:focus {
   outline: none;
 }

@@ -12,10 +12,13 @@ function renderPrompt(container, prompt, opts, onSelect) {
 
   const row = document.createElement("div");
   row.className = "juego-options";
+  row.setAttribute("role", "group");
+  row.setAttribute("aria-label", "Opciones de respuesta");
   opts.forEach((opt, i) => {
     const b = document.createElement("button");
     b.type = "button";
     b.textContent = opt;
+    b.setAttribute("aria-label", `Opción: ${opt}`);
     b.setAttribute("data-index", String(i));
     b.addEventListener("click", () => onSelect(i));
     row.appendChild(b);
@@ -26,6 +29,8 @@ function renderPrompt(container, prompt, opts, onSelect) {
 function showResult(container, correct, correctAnswer, mascotaUI) {
   const msg = document.createElement("div");
   msg.className = "juego-result";
+  msg.setAttribute("role", "status");
+  msg.setAttribute("aria-live", "polite");
   if (correct) {
     msg.textContent = "¡Muy bien! 🎉";
     msg.className += " juego-result--ok";
@@ -93,7 +98,7 @@ export async function showJuego({ app, activeChild, setView }) {
   );
 
   const header = document.createElement("header");
-  header.innerHTML = `<h1>Juego</h1><button id="backBtn" type="button">Volver</button>`;
+  header.innerHTML = `<h1>Juego</h1><button id="backBtn" type="button" aria-label="Volver al menú principal">Volver</button>`;
   section.appendChild(header);
   section.appendChild(body);
   app.appendChild(section);

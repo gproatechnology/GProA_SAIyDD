@@ -25,7 +25,13 @@
     <link rel="stylesheet" href="./src/css/styles.css" />
   </head>
   <body>
-    <div id="splash" class="splash">
+    <a href="#app" class="skip-link">Saltar al contenido principal</a>
+    <div
+      id="splash"
+      class="splash"
+      role="region"
+      aria-label="Pantalla de carga inicial"
+    >
       <div class="splash-card">
         <div class="splash-logo">SaIyDD</div>
         <div class="splash-title">Sistema de Aprendizaje Inclusivo</div>
@@ -34,10 +40,17 @@
           <span class="dot"></span>
           <span class="dot"></span>
         </div>
-        <div class="splash-status" id="splashStatus">Cargando...</div>
+        <div
+          class="splash-status"
+          id="splashStatus"
+          role="status"
+          aria-live="polite"
+        >
+          Cargando...
+        </div>
       </div>
     </div>
-    <main id="app" class="app-container"></main>
+    <main id="app" class="app-container" role="main"></main>
     <script type="module" src="./src/js/main.js"></script>
   </body>
 </html>

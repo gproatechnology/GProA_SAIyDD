@@ -8,9 +8,9 @@ export function showMenu({ app, setView }) {
     <header>
       <h1>Menú</h1>
       <div class="mascota-bar"></div>
-      <button id="chatbotBtn" class="btn btn-outline">Chat</button>
+      <button id="chatbotBtn" class="btn btn-outline" aria-label="Abrir asistente de chat Orion">Chat</button>
     </header>
-    <div class="menu-grid"></div>
+    <div class="menu-grid" role="navigation" aria-label="Actividades principales"></div>
   `;
 
   const mascotaUI = {};
@@ -37,7 +37,7 @@ export function showMenu({ app, setView }) {
   grid.innerHTML = items
     .map(
       (i) =>
-        `<button type="button" data-view="${i.view}">${i.icon}<span>${i.label}</span></button>`,
+        `<button type="button" data-view="${i.view}" aria-label="Ir a ${i.label}"><span aria-hidden="true">${i.icon}</span> <span>${i.label}</span></button>`,
     )
     .join("");
   grid

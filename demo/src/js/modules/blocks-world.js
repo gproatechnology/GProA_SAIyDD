@@ -140,6 +140,8 @@ let overlayTimer = null;
 function showOverlay(msg) {
   const wrap = document.createElement("div");
   wrap.className = "blocks-overlay";
+  wrap.setAttribute("role", "status");
+  wrap.setAttribute("aria-live", "assertive");
   wrap.textContent = msg;
   const root = document.getElementById("blocksStage");
   const canvasWrap = root?.querySelector(".blocks-canvas-wrap");
@@ -154,25 +156,25 @@ export function showBlocksWorld({ app, setView }) {
   section.innerHTML = `
     <div class="blocks-wrap">
       <div class="blocks-header">
-        <h1>🏖️ Mundo Bloques</h1>
+        <h1><span aria-hidden="true">🏖️</span> Mundo Bloques</h1>
         <div class="help-text">Mové el avatar con las flechas o los botones. Esc = salir.</div>
       </div>
       <div class="blocks-canvas-wrap">
-        <canvas id="blocksCanvas" aria-label="Mundo bloques"></canvas>
-        <div class="blocks-hud" id="blocksHud">Nivel: - | Coleccionados: 0</div>
+        <canvas id="blocksCanvas" role="img" aria-label="Mundo bloques interactivo"></canvas>
+        <div class="blocks-hud" id="blocksHud" role="status" aria-live="polite">Nivel: - | Coleccionados: 0</div>
       </div>
       <div class="blocks-controls">
-        <div class="controls-pad">
-          <button type="button" class="control-btn spacer" aria-hidden="true"></button>
-          <button type="button" class="control-btn" data-dir="up" aria-label="Arriba">↑</button>
-          <button type="button" class="control-btn spacer" aria-hidden="true"></button>
-          <button type="button" class="control-btn" data-dir="left" aria-label="Izquierda">←</button>
-          <button type="button" class="control-btn" data-dir="down" aria-label="Abajo">↓</button>
-          <button type="button" class="control-btn" data-dir="right" aria-label="Derecha">→</button>
+        <div class="controls-pad" role="group" aria-label="Controles de movimiento en pantalla">
+          <button type="button" class="control-btn spacer" aria-hidden="true" tabindex="-1"></button>
+          <button type="button" class="control-btn" data-dir="up" aria-label="Mover hacia arriba"><span aria-hidden="true">↑</span></button>
+          <button type="button" class="control-btn spacer" aria-hidden="true" tabindex="-1"></button>
+          <button type="button" class="control-btn" data-dir="left" aria-label="Mover hacia la izquierda"><span aria-hidden="true">←</span></button>
+          <button type="button" class="control-btn" data-dir="down" aria-label="Mover hacia abajo"><span aria-hidden="true">↓</span></button>
+          <button type="button" class="control-btn" data-dir="right" aria-label="Mover hacia la derecha"><span aria-hidden="true">→</span></button>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;justify-content:center;">
-          <button id="exitBlocks" type="button" class="control-btn" style="background:#ef476f;color:#fff;">Volver</button>
-          <button id="nextLevelBtn" type="button" class="control-btn" style="background:#118AB2;color:#fff;" disabled>Siguiente nivel</button>
+          <button id="exitBlocks" type="button" class="control-btn" aria-label="Salir de mundo bloques y volver al menú" style="background:#ef476f;color:#fff;">Volver</button>
+          <button id="nextLevelBtn" type="button" class="control-btn" aria-label="Avanzar al siguiente nivel" style="background:#118AB2;color:#fff;" disabled>Siguiente nivel</button>
         </div>
       </div>
       <div id="blocksStage"></div>

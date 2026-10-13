@@ -29,7 +29,7 @@ export function showBienvenida({ app, setView, saveProfile }) {
       <p>Escribí tu nombre y elegí un avatar</p>
       <div class="login-form">
         <label for="childName">Nombre</label>
-        <input id="childName" type="text" autocomplete="off" placeholder="Tu nombre" maxlength="20" />
+        <input id="childName" type="text" autocomplete="off" placeholder="Tu nombre" maxlength="20" aria-required="true" />
       </div>
       <header class="mascota-header"></header>
       <div class="avatars"></div>
@@ -43,20 +43,30 @@ export function showBienvenida({ app, setView, saveProfile }) {
     updateMascotaUI(mascota, mascotaUI),
   );
 
-  const avatars = ["🐱", "🐶", "🐰", "🦁"];
+  const avatars = [
+    { icon: "🐱", label: "Gatito" },
+    { icon: "🐶", label: "Perrito" },
+    { icon: "🐰", label: "Conejito" },
+    { icon: "🦁", label: "Leoncito" },
+  ];
   const avatarsContainer = card.querySelector(".avatars");
+  avatarsContainer.setAttribute("role", "radiogroup");
+  avatarsContainer.setAttribute("aria-label", "Elige un avatar");
   avatarsContainer.innerHTML = avatars
     .map(
-      (a, i) =>
-        `<button type="button" data-avatar="${a}" aria-label="Avatar ${i + 1}">${a}</button>`,
+      (a) =>
+        `<button type="button" role="radio" aria-checked="false" data-avatar="${a.icon}" aria-label="Avatar ${a.label}"><span aria-hidden="true">${a.icon}</span></button>`,
     )
     .join("");
   card.querySelectorAll("[data-avatar]").forEach((b) =>
     b.addEventListener("click", (e) => {
-      card
-        .querySelectorAll("[data-avatar]")
-        .forEach((x) => x.classList.remove("is-selected"));
+      card.querySelectorAll("[data-avatar]").forEach((x) => {
+        x.classList.remove("is-selected");
+        x.setAttribute("aria-checked", "false");
+      });
       e.currentTarget.classList.add("is-selected");
+      e.currentTarget.setAttribute("aria-checked", "true");
+      validate();
     }),
   );
 

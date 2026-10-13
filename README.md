@@ -269,7 +269,7 @@ Pasos de la prueba:
 | Servicio Roblox (Luau + RemoteEvents) | ✅ Contrato, cliente HTTP, bridge y play test validado |
 | Backend + auth de tutores | ✅ SQLModel, bcrypt + JWT, tests y CI |
 | Pruebas, linting y CI | ✅ Completados (Vitest, Pytest, Ruff, ESLint) |
-| Accesibilidad y seguridad productiva | 🟡 En progreso (8.1 auditoría técnica completada; 8.2–8.6 pendientes) |
+| Accesibilidad y seguridad productiva | 🟡 En progreso (8.1 auditoría y 8.2 accesibilidad completadas; 8.3–8.6 pendientes) |
 
 La sincronización Rojo, el backend y la integración Studio ↔ backend están verificados (`rojo build`, `rojo serve`, flujo API de extremo a extremo), incluyendo la prueba de Play en Studio con registro real de sesión en el backend (`Client.recordSession` → RemoteEvent → Script del servidor → `POST /api/sessions` → 201).
 
@@ -295,7 +295,7 @@ La sincronización Rojo, el backend y la integración Studio ↔ backend están 
 7. ✅ Roblox Studio ↔ backend vía Rojo (contrato, cliente HTTP con JWT, RemoteEvents, `rojo-manager.ps1` extendido). Play test en Studio validado end-to-end (ver "Integración con Roblox").
 8. 🟡 Preparación para producción (en progreso):
    - **8.1 ✅ Auditoría de seguridad técnica**: CORS, JWT, rate limiting, secretos Luau y endpoints protegidos documentados en `docs/SECURITY_REVIEW.md`.
-   - **8.2 ⏳ Accesibilidad**: skip-link, alt text, contraste y aria-labels en demo web y manual.
+   - **8.2 ✅ Accesibilidad**: skip-links, navegación por teclado, roles semánticos y aria-labels implementados en demo web y manual.
    - **8.3 ⏳ Moderación y consentimiento**: flujo de consentimiento parental informado para recopilación de datos.
    - **8.4 ⏳ Privacidad infantil (COPPA)**: política explícita de retención, minimización y borrado de datos.
    - **8.5 ⏳ Validación demo web contra backend real**: prueba completa en vivo con `VITE_SAIYDD_API_URL` y token.

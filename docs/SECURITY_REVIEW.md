@@ -99,30 +99,14 @@
 - Paso 0 completado; paso 1 hecho (revisión). Sin commits.
 
 
-## 8.2 Accesibilidad (demo web + manual) — PREPARACIÓN
-- Demo: index.html semántico, vistas app/menu/juego/dashboard
-- Assets: alt text
-- Teclado/foco/contraste
-- Manual: docs/manual-usuario.html
-- Estado: EN PROGRESO (rápido)
----
-
-
-## 8.2 Accesibilidad (demo) — hallazgos
-- index.html: lang='es', meta viewport/description/theme-color OK. Falta skip-link? No visible. Contenedor #app sin role?
-- app.js: tras render mueve foco a <section tabindex='-1'> — buen intento (focus management).
-- Revisar: landmarks (main ya existe), foco visible (CSS), alt text en imágenes.
-- Estado: OK parcial; revisar módulos específicos.
----
-
-
-## 8.2 Accesibilidad (rápido) — estado
-- index.html: main presente, lang es, no skip-link (mejora menor).
-- app.js: focus management a section (buen intento).
-- Módulos: usan innerHTML con emojis/icons (no alt). Botones con texto OK en general.
-- Manual: docs/manual-usuario.html tiene estructura básica (HTML).
-- Sin cambios de código (solo revisión).
-- CONCLUSIÓN 8.2: revisión rápida OK. Hallazgos menores (skip-link, alt, aria). No bloqueante. Pasar a 8.3.
+## 8.2 Accesibilidad (demo web + manual) — COMPLETADO
+- **Skip-links**: implementados en `demo/index.html` (`#app`) y en `docs/manual-usuario.html` (`#inicio`), con foco visible garantizado.
+- **Landmarks y semántica**: `main` con `role="main"`, regiones con `role="region"` y `aria-label` descriptivos.
+- **Mascota Orion**: `role="img"`, etiquetas dinámicas según expresión (`aria-label="Mascota Orion: feliz y atento"` etc.) y `aria-pressed` en mute.
+- **Selectores y botones**: `radiogroup` accesible con nombres textuales para avatares (Gatito, Perrito, Conejito, Leoncito), emojis decorativos aislados con `aria-hidden="true"`.
+- **Notificaciones y estados**: `role="status"` y `aria-live="polite"` en resultados de juego, HUD de bloques y splash; `role="log"` en chatbot; `role="alert"` en PIN inválido.
+- **Validación de calidad**: ESLint, Prettier, Vitest (26/26) y Vite build pasando sin advertencias.
+- **Estado: COMPLETADO ✅**. Pasar a 8.3.
 ---
 
 
