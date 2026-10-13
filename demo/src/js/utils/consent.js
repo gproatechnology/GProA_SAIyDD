@@ -88,3 +88,43 @@ export function clearAllChildData({ preserveConsent = true } = {}) {
     return false;
   }
 }
+
+/**
+ * Depura sesiones cuya antigüedad supere maxDays (política de retención COPPA).
+ * Retorna la cantidad de sesiones depuradas.
+ */
+export function pruneExpiredSessions(maxDays = 90) {
+  try {
+    const storage = getStorage();
+    if (!storage) return 0;
+    const cutoff = Date.now() - maxDays * 24 * 60 * 60 * 1000;
+    let prunedCount = 0;
+
+    const len = storage.length || 0;
+    for (let i = 0; i < len; i++) {
+      const key = storage.key(i);
+      if (key && key.startsWith("saiydd_sessions_")) {
+        const raw = storage.getItem(key);
+        if (!raw) continue;
+        try {
+          const sessions = JSON.parse(raw);
+          if (Array.isArray(sessions)) {
+            const fresh = sessions.filter((s) => {
+              const sessionTime = s.finishedAt || s.startedAt;
+              if (!sessionTime) return true;
+              const t = new Date(sessionTime).getTime();
+              return isNaN(t) || t >= cutoff;
+            });
+            prunedCount += sessions.length - fresh.length;
+            storage.setItem(key, JSON.stringify(fresh));
+          }
+        } catch {
+          // ignorar errores de formato
+        }
+      }
+    }
+    return prunedCount;
+  } catch {
+    return 0;
+  }
+}
