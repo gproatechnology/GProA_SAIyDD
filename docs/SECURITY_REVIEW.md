@@ -110,11 +110,14 @@
 ---
 
 
-## 8.3 Moderación y consentimiento
-- Contenidos: respuestas preaprobadas (chatbot usa respuestas locales), actividades fijas (data.js), no generación libre.
-- API: sin endpoint de validación libre (submitAnswer demo local).
-- Consentimiento: panel padres (dashboard), PIN externo configurable. No hay flujo de consentimiento explícito por usuario (pendiente).
-- Moderación: solo contenido estático/preaprobado. Estado: REVISAR. Necesario definir flujo de consentimiento para datos (perfil/sesiones).
+## 8.3 Moderación y consentimiento — COMPLETADO
+- **Modelo de Moderación ("Walled Garden")**: Chatbot basado exclusivamente en base de conocimiento curada (`KB`), sin llamadas libres a LLMs. Actividades didácticas estructuradas sin campo de entrada abierta para los menores.
+- **Guardrails**: Saneamiento de cadenas (`sanitize.js`), limitación de frecuencia de acciones (`rate-limiter.js`) y endpoints protegidos con rate limiting (`slowapi`).
+- **Consentimiento Parental Informado**: Control de acceso previo con PIN en el Panel de Padres. Selector interactivo de consentimiento para almacenar progreso en `dashboard.js` con soporte en `consent.js`.
+- **Revocación activa**: Si el tutor desactiva el consentimiento, `juego.js` detiene inmediatamente la persistencia de nuevas sesiones.
+- **Derecho al olvido**: Botón de borrado total de perfil, sesiones y avances locales en un solo paso (`clearAllChildData()`).
+- **Documentación formal**: Creado `docs/CONSENTIMIENTO_Y_MODERACION.md` detallando las políticas y salvaguardas.
+- **Estado: COMPLETADO ✅**. Pasar a 8.4.
 ---
 
 

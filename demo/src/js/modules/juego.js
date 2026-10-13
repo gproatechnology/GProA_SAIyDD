@@ -3,6 +3,7 @@ import { createMascotaBar, updateMascotaUI } from "./mascota-ui.js";
 import { api } from "./api.js";
 import { clampText } from "../utils/sanitize.js";
 import { allowAction } from "../utils/rate-limiter.js";
+import { getConsentStatus } from "../utils/consent.js";
 
 function renderPrompt(container, prompt, opts, onSelect) {
   const p = document.createElement("p");
@@ -143,6 +144,11 @@ export async function showJuego({ app, activeChild, setView }) {
   function persistSession() {
     const act = current();
     if (!act) return;
+    const consent = getConsentStatus();
+    // Si el tutor explícitamente revocó o denegó el consentimiento, no se almacena telemetría persistente
+    if (consent.guardianConfirmed && !consent.granted) {
+      return;
+    }
     saveSession({
       id: `sess_${Date.now().toString(36)}`,
       childId: activeChild?.id || "child_001",

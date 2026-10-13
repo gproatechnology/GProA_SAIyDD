@@ -151,6 +151,58 @@
   flex-wrap: wrap;
 }
 
+.dashboard-consent {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-lg);
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+}
+.dashboard-consent h2 {
+  font-size: 1.15rem;
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.consent-status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+.consent-status-badge.is-granted {
+  background: #d8f3dc;
+  color: #1b4332;
+}
+.consent-status-badge.is-revoked {
+  background: #ffe3e3;
+  color: #902020;
+}
+.consent-info-list {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin: var(--space-sm) 0;
+  padding-left: 20px;
+  line-height: 1.4;
+}
+.consent-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
 .screen--login .login-form {
   margin-bottom: var(--space-lg);
 }

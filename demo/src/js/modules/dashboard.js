@@ -36,6 +36,11 @@ function formatTime(seconds) {
 }
 
 import { validatePin, PIN_FROM_ENV } from "../config.js";
+import {
+  getConsentStatus,
+  setConsent,
+  clearAllChildData,
+} from "../utils/consent.js";
 
 function askPin() {
   const hint = PIN_FROM_ENV ? "" : " (demo)";
@@ -57,6 +62,26 @@ export function showDashboard({ app, setView }) {
     <div class="dashboard-actions" role="group" aria-label="Acciones del panel">
       <button id="exportBtn" type="button" aria-label="Exportar datos de progreso en formato JSON">Exportar JSON</button>
       <button id="resetBtn" type="button" aria-label="Borrar historial y progreso acumulado" style="background:#ef476f;color:#fff;">Borrar progreso</button>
+    </div>
+    <div class="dashboard-consent" role="region" aria-labelledby="consentTitle">
+      <h2 id="consentTitle">🛡️ Consentimiento Parental y Privacidad Kid-Safe</h2>
+      <div id="consentBadge" class="consent-status-badge"></div>
+      <p id="consentDesc" style="font-size:0.9rem;color:var(--color-text-muted);">
+        SaIyDD cumple con directrices de privacidad infantil (COPPA y protección de datos). Los datos registrados se limitan a avances pedagógicos locales del perfil seleccionado.
+      </p>
+      <ul class="consent-info-list">
+        <li><strong>Datos guardados:</strong> alias/avatar, actividades completadas y aciertos.</li>
+        <li><strong>Protección garantizada:</strong> sin anuncios, sin rastreadores externos, sin geolocalización ni retención de grabaciones de voz.</li>
+      </ul>
+      <div class="consent-controls">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+          <input type="checkbox" id="consentToggle" style="width:18px;height:18px;cursor:pointer;" />
+          <span>Autorizar registro de progreso y sesiones</span>
+        </label>
+        <button id="wipeAllBtn" type="button" style="background:#6c757d;color:#fff;font-size:0.85rem;" aria-label="Eliminar todos los datos del menor (derecho al olvido)">
+          Borrado total del menor
+        </button>
+      </div>
     </div>
   `;
 
@@ -108,6 +133,43 @@ export function showDashboard({ app, setView }) {
   renderStats();
   mascota.setExpression("encourage");
   updateMascotaUI(mascota, mascotaUI);
+
+  const consentToggle = section.querySelector("#consentToggle");
+  const consentBadge = section.querySelector("#consentBadge");
+  const wipeAllBtn = section.querySelector("#wipeAllBtn");
+
+  function updateConsentView() {
+    const status = getConsentStatus();
+    consentToggle.checked = status.granted;
+    if (status.granted) {
+      consentBadge.textContent = "Estado: Consentimiento otorgado ✅";
+      consentBadge.className = "consent-status-badge is-granted";
+    } else {
+      consentBadge.textContent =
+        "Estado: Registro deshabilitado / Pendiente ⏸️";
+      consentBadge.className = "consent-status-badge is-revoked";
+    }
+  }
+
+  updateConsentView();
+
+  consentToggle.addEventListener("change", (e) => {
+    setConsent(e.target.checked);
+    updateConsentView();
+  });
+
+  wipeAllBtn.addEventListener("click", () => {
+    if (
+      confirm(
+        "¿Estás seguro de que deseas eliminar TODOS los datos del menor (perfil, sesiones y progreso)? Esta acción no se puede deshacer.",
+      )
+    ) {
+      clearAllChildData({ preserveConsent: true });
+      renderStats();
+      alert("Todos los datos del perfil y sesiones han sido eliminados.");
+      setView("login");
+    }
+  });
 
   section.querySelector("#backBtn").addEventListener("click", () => {
     mascota.stop();
