@@ -1,4 +1,4 @@
-import mascota from "./mascota.js";
+﻿import mascota from "./mascota.js";
 import { createMascotaBar, updateMascotaUI } from "./mascota-ui.js";
 
 function localStorageKey() {
