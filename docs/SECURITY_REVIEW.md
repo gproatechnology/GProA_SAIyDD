@@ -1,4 +1,4 @@
-﻿
+
 ## 0. Preparación (completado)
 - Dir: SAIyDD (ok)
 - pytest: 14/14 passed
@@ -6,7 +6,7 @@
 - backend/.env: NO (existe .env.example)
 - demo/.env: NO (existe .env.example)
 - %TEMP%\saiydd-state.json existe (token puede expirar)
-- rojo/server/secrets.lua en .gitignore; no hay secrets.example.lua visible en server/
+- rojo/server/secrets.lua en .gitignore; plantilla rojo/server/secrets.example.lua versionada (ok)
 - demo tests: 26/26 passed
 ---
 
@@ -64,9 +64,9 @@
 - rojo/server/main.server.lua: Script server-side. HttpService.RequestAsync para login + POST sessions.
 - Cache JWT + relogin ante 401 (coincide diseño). Usa pcall(task.cancel, ...) según commits.
 - RemoteEvents: conecta handlers, valida tipos (SessionPayload schema en shared/init.lua). Datos recibidos desde cliente: se envían a backend con auth server-side (no se acepta token cliente).
-- No se imprimen tokens/secretos en logs (revisar: mensajes de error genéricos).
-- Añadida rojo/server/secrets.example.lua (plantilla).
-- Estado: REVISAR (punto menor: falta plantilla). Riesgo: Baja.
+- No se imprimen tokens/secretos en logs (mensajes de error genéricos).
+- Añadida y versionada rojo/server/secrets.example.lua (plantilla).
+- Estado: OK (secrets.lua protegido y plantilla provista). Riesgo: Baja.
 ---
 
 
