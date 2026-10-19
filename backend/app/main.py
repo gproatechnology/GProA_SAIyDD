@@ -22,6 +22,7 @@ from app.repositories import (
     create_child,
     create_session,
     create_tutor,
+    delete_child_data,
     get_child,
     get_progress,
     get_tutor_by_email,
@@ -153,6 +154,21 @@ def get_progress_endpoint(
     if not child_exists(session, child_id):
         raise HTTPException(status_code=404, detail="Niño no encontrado")
     return get_progress(session, child_id)
+
+
+@app.delete(
+    "/api/children/{child_id}",
+    response_model=dict,
+    tags=["niños"],
+)
+def delete_child_endpoint(
+    child_id: str,
+    tutor: TutorModel = Depends(require_tutor),
+    session: Session = Depends(get_session),
+) -> dict:
+    if not delete_child_data(session, child_id):
+        raise HTTPException(status_code=404, detail="Niño no encontrado")
+    return {"message": "Datos del niño borrados completamente"}
 
 
 @app.post(

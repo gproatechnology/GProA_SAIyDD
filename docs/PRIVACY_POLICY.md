@@ -20,9 +20,11 @@ Alcance: demo web, backend local (FastAPI), integración con Roblox Studio.
 - Backend: SQLite saiydd.db (tutores, niños, sesiones).
 
 ## 4. Retención y borrado
-- Datos pueden borrarse desde Panel de padres → "Borrado total del menor".
-- Al borrar se elimina localStorage y puede afectar registros backend según operación.
-- Retención mínima; sin caducidad automática implícita (pendiente definir política formal).
+- **Derecho al olvido**: el tutor puede solicitar el borrado total de todos los datos de un menor desde el panel de padres o mediante el endpoint `DELETE /api/children/{childId}` del backend. Al borrar se eliminan el perfil del menor y todas sus sesiones asociadas de forma inmediata e irreversible.
+- **Borrado local**: los datos guardados en `localStorage` del navegador (demo web) se borran al usar la opción "Borrado total del menor" en el panel de padres.
+- **Borrado en backend**: el endpoint `DELETE /api/children/{childId}` elimina el perfil del menor y todas las sesiones registradas en la base de datos SQLite (`saiydd.db`). Requiere autenticación JWT con rol de tutor.
+- **Retención**: no hay caducidad automática implícita. Los datos se conservan hasta que el tutor solicite su borrado explícito. No se establece un período de retención predeterminado; el responsable del tratamiento decide cuándo borrar.
+- **Minimización**: solo se almacenan los datos estrictamente necesarios para la experiencia educativa (nombre, avatar, preferencias, puntuación, duración e interacciones de las actividades). No se recopilan datos de ubicación, contacto, ni datos sensibles.
 
 ## 5. Seguridad
 - HTTPS recomendado en prod.

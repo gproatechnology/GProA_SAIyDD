@@ -173,6 +173,58 @@ def test_child_flow_with_token(client):
     assert missing.status_code == 404
 
 
+def test_delete_child_removes_profile_and_sessions(client):
+    email = unique_email()
+    headers = auth_headers(client, email)
+
+    child = client.post(
+        "/api/children",
+        json={"name": "Luna", "avatar": "estelar"},
+        headers=headers,
+    ).json()
+    child_id = child["id"]
+
+    client.post(
+        "/api/sessions",
+        json={
+            "childId": child_id,
+            "activityId": "act_001",
+            "score": 80,
+            "durationSeconds": 120,
+            "interactions": [
+                {
+                    "promptIndex": 0,
+                    "selectedIndex": 1,
+                    "correct": True,
+                    "responseTimeMs": 3500,
+                }
+            ],
+        },
+        headers=headers,
+    )
+
+    # Borrar datos del niño
+    resp = client.delete(f"/api/children/{child_id}", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json()["message"] == "Datos del niño borrados completamente"
+
+    # Perfil ya no existe
+    got = client.get(f"/api/children/{child_id}", headers=headers)
+    assert got.status_code == 404
+
+    # Progreso ya no existe
+    prog = client.get(f"/api/children/{child_id}/progress", headers=headers)
+    assert prog.status_code == 404
+
+
+def test_delete_child_nonexistent_returns_404(client):
+    email = unique_email()
+    headers = auth_headers(client, email)
+
+    resp = client.delete("/api/children/child_nope", headers=headers)
+    assert resp.status_code == 404
+
+
 def test_session_flow_with_token(client):
     email = unique_email()
     headers = auth_headers(client, email)

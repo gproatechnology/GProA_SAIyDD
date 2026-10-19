@@ -50,6 +50,20 @@ def child_exists(session: Session, child_id: str) -> bool:
     return session.get(ChildModel, child_id) is not None
 
 
+def delete_child_data(session: Session, child_id: str) -> bool:
+    child = session.get(ChildModel, child_id)
+    if child is None:
+        return False
+    sessions = session.exec(
+        select(SessionModel).where(SessionModel.child_id == child_id)
+    ).all()
+    for s in sessions:
+        session.delete(s)
+    session.delete(child)
+    session.commit()
+    return True
+
+
 def activity_exists(session: Session, activity_id: str) -> bool:
     return session.get(ActivityModel, activity_id) is not None
 
