@@ -29,6 +29,12 @@
         "$className": "StarterPlayerScripts",
         "Client": {
           "$path": "client"
+        },
+        "ActivityGui": {
+          "$path": "gui/ActivityController.client.lua"
+        },
+        "TestRecordSession": {
+          "$path": "tests/TestRecordSession.client.lua"
         }
       }
     }

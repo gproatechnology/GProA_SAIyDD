@@ -84,29 +84,23 @@ function Shared.validateSessionPayload(payload: any): boolean
 end
 
 -- Interpreta la respuesta de HttpService:RequestAsync.
--- "ok" indica que hubo respuesta HTTP (sin error de red);
--- hay que verificar "status" para los códigos 2xx/4xx/5xx.
+-- "ok" indica que hubo respuesta HTTP (sin error de red a nivel socket);
+-- hay que verificar "status" con isSuccessStatus para los códigos 2xx.
 function Shared.parseApiResponse(response: any): ApiResult
-	local ok = response ~= nil and response.Success == true
-	local status = 0
-	if response ~= nil and response.StatusCode ~= nil then
-		status = response.StatusCode
-	end
+	local hasResponse = response ~= nil and type(response.StatusCode) == "number"
+	local status = if hasResponse then response.StatusCode else 0
 
 	local data: any = nil
-	if ok then
-		local body = response.Body
-		if type(body) == "string" and body ~= "" then
-			local success, decoded = pcall(function(): any
-				return HttpService:JSONDecode(body)
-			end)
-			if success then
-				data = decoded
-			end
+	if response ~= nil and type(response.Body) == "string" and response.Body ~= "" then
+		local success, decoded = pcall(function(): any
+			return HttpService:JSONDecode(response.Body)
+		end)
+		if success then
+			data = decoded
 		end
 	end
 
-	return { ok = ok, status = status, data = data }
+	return { ok = hasResponse, status = status, data = data }
 end
 
 -- Verifica si un código de estado HTTP es exitoso (2xx).

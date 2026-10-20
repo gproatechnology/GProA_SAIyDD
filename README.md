@@ -186,9 +186,12 @@ sequenceDiagram
     S-->>C: respuesta por RemoteEvent
 ```
 
-- `rojo/shared/init.lua`: contrato compartido genérico (endpoints, payloads, RemoteEvents) — sin secretos.
-- `rojo/server/main.server.lua`: Script del servidor (arranca solo al abrir el place) — cliente HTTP (`HttpService:RequestAsync`), login de cuenta de servicio con cache de JWT y relogin ante 401, handlers de los RemoteEvents.
-- `rojo/client/main.lua`: bridge cliente (`Client.recordSession` / `Client.healthCheck`, corrutinas con timeout).
+- `rojo/shared/init.lua`: contrato compartido genérico (endpoints, payloads, RemoteEvents, parseo robusto de respuestas y errores HTTP) — sin secretos.
+- `rojo/server/main.server.lua`: Script del servidor (arranca solo al abrir el place) — cliente HTTP (`HttpService:RequestAsync`), normalización a IPv4 (`127.0.0.1`), login de cuenta de servicio con cache de JWT y relogin ante 401, handlers de los RemoteEvents.
+- `rojo/server/WorldBuilder.server.lua`: Generador procedural del mundo 3D en Workspace (construye la arena segura, cartel gigante luminoso con preguntas y 4 plataformas táctiles que el avatar pisa para responder).
+- `rojo/client/main.lua`: bridge cliente (`Client.recordSession` / `Client.healthCheck`, corrutinas con timeout, cola para peticiones concurrentes y replicación defensiva con `WaitForChild`).
+- `rojo/gui/ActivityController.client.lua`: Interfaz visual interactiva en pantalla (`StarterPlayerScripts.ActivityGui`) accesible para niños de 4 a 8 años con pestañas de actividades, preguntas con botones táctiles coloridos, mascota Niko, botón de minimizado para vista 3D completa y registro automático de sesión.
+- `rojo/tests/TestRecordSession.client.lua`: LocalScript de prueba de humo defensivo en `StarterPlayer.StarterPlayerScripts` (modo pasivo con toggle para diagnósticos).
 - `rojo/server/secrets.lua`: credenciales del servicio (ignorado por git; plantilla en `rojo/secrets.example.lua`).
 
 ### Uso con `rojo-manager.ps1`
@@ -212,20 +215,20 @@ La opción 8 guarda `{apiUrl, token, templateId}` en `%TEMP%\saiydd-state.json` 
 
 Pasos de la prueba:
 
-1. Durante el Play, un LocalScript temporal en StarterPlayerScripts:
+1. El LocalScript `TestRecordSession` (`rojo/tests/TestRecordSession.client.lua`) se sincroniza automáticamente vía Rojo en `StarterPlayer.StarterPlayerScripts`:
 
    ```lua
-   local Client = require(script.Parent:WaitForChild("Client"))
-   task.spawn(function()
-       local reply = Client.recordSession("child_ID_AQUI", "act_001", 100, 90)
-       print("[TEST] recordSession ->", reply.ok)
-   end)
+   -- Ejecuta automáticamente en Play (F5):
+   -- [1/4] Validación de sincronización de Rojo y carga de Client.main (timeout defensivo de 10s)
+   -- [2/4] Introspección y validación de tipos de las funciones exportadas (healthCheck, recordSession)
+   -- [3/4] HealthCheck end-to-end hacia http://127.0.0.1:8000/api/health
+   -- [4/4] Registro de sesión de prueba usando el ID presembrado "child_TEST_001" (aislado con is_test: True)
    ```
 
-2. Verificar la persistencia compartida:
+2. Verificar la persistencia compartida del progreso del niño de prueba:
 
    ```powershell
-   curl.exe -H "Authorization: Bearer $token" http://127.0.0.1:8000/api/children/$childId/progress
+   curl.exe -H "Authorization: Bearer $token" http://127.0.0.1:8000/api/children/child_TEST_001/progress
    ```
 
 ## Preparación actual

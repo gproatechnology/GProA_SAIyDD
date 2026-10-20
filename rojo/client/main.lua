@@ -9,15 +9,15 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local sharedModule = ReplicatedStorage:FindFirstChild("Shared")
+local sharedModule = ReplicatedStorage:WaitForChild("Shared", 10)
 if sharedModule == nil then
-	error("[SaIyDD] No se encontró ReplicatedStorage.Shared. Sincronizá con Rojo primero.")
+	error("[SaIyDD] No se encontró ReplicatedStorage.Shared tras 10s. Sincronizá con Rojo primero.")
 end
 local Shared = require(sharedModule)
 
-local eventsFolder = ReplicatedStorage:FindFirstChild("Events")
+local eventsFolder = ReplicatedStorage:WaitForChild("Events", 10)
 if eventsFolder == nil then
-	error("[SaIyDD] No se encontró ReplicatedStorage.Events. Sincronizá con Rojo primero.")
+	error("[SaIyDD] No se encontró ReplicatedStorage.Events tras 10s. Sincronizá con Rojo primero.")
 end
 
 local Client = {}
@@ -47,12 +47,17 @@ end
 
 -- Dispara el RemoteEvent y bloquea hasta la respuesta del servidor.
 local function callServer(name: string, payload: any?): Shared.RemoteReply
-	local event = eventsFolder:FindFirstChild(name)
+	local event = eventsFolder:WaitForChild(name, 5)
 	if event == nil or not event:IsA("RemoteEvent") then
 		return Shared.newError("RemoteEvent no encontrado: " .. name, "missing_event")
 	end
-	if waiters[event] ~= nil then
-		return Shared.newError("Ya hay una petición en curso: " .. name, "busy")
+	-- Si ya hay una petición en curso para este RemoteEvent, esperamos a que termine
+	local waitStart = os.clock()
+	while waiters[event] ~= nil do
+		if os.clock() - waitStart > REPLY_TIMEOUT_SECONDS then
+			return Shared.newError("Tiempo de espera en cola agotado para: " .. name, "queue_timeout")
+		end
+		task.wait(0.1)
 	end
 	if not coroutine.isyieldable() then
 		error("[SaIyDD] " .. name .. " debe llamarse desde una corrutina (ej: task.spawn).", 2)

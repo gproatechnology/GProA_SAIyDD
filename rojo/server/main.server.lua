@@ -18,7 +18,9 @@ if secretsModule == nil then
 end
 local Secrets = require(secretsModule)
 
-local BASE_URL: string = (Secrets.apiUrl or "http://localhost:8000"):gsub("/+$", "")
+local BASE_URL: string = (Secrets.apiUrl or "http://127.0.0.1:8000"):gsub("/+$", "")
+-- Normaliza localhost a 127.0.0.1 para evitar problemas de resolución IPv6 en Studio/Windows:
+BASE_URL = BASE_URL:gsub("^http://localhost:", "http://127.0.0.1:")
 
 -- JWT de la cuenta de servicio, cacheado tras el primer login.
 local TOKEN: string? = nil
@@ -51,7 +53,13 @@ local function request(
 		return HttpService:RequestAsync(options)
 	end)
 	if not ok then
-		return { ok = false, status = 0, data = nil }
+		local errMsg = tostring(response)
+		warn("[SaIyDD] Fallo HttpService (" .. method .. " " .. options.Url .. "): " .. errMsg)
+		return {
+			ok = false,
+			status = 0,
+			data = { error = { code = "network_error", message = errMsg } },
+		}
 	end
 	return Shared.parseApiResponse(response)
 end
@@ -104,7 +112,11 @@ local function recordSession(payload: any): Shared.RemoteReply
 	end
 
 	if not result.ok then
-		return Shared.newError("Sin respuesta del backend", "network_error")
+		local msg = "Sin respuesta del backend"
+		if result.data and result.data.error and result.data.error.message then
+			msg = result.data.error.message
+		end
+		return Shared.newError(msg, "network_error")
 	end
 	if not Shared.isSuccessStatus(result.status) then
 		local message = "Error del backend (HTTP " .. result.status .. ")"
@@ -125,7 +137,11 @@ end
 local function healthCheck(): Shared.RemoteReply
 	local result = request("GET", Shared.ENDPOINTS.health, nil, nil)
 	if not result.ok then
-		return Shared.newError("Sin respuesta del backend", "network_error")
+		local msg = "Sin respuesta del backend"
+		if result.data and result.data.error and result.data.error.message then
+			msg = result.data.error.message
+		end
+		return Shared.newError(msg, "network_error")
 	end
 	if not Shared.isSuccessStatus(result.status) then
 		return Shared.newError(
@@ -160,5 +176,14 @@ end
 
 wireEvent(Shared.EVENTS.recordSession, recordSession)
 wireEvent(Shared.EVENTS.healthCheck, healthCheck)
+
+-- Expone BindableFunction para que scripts del servidor (como WorldBuilder) puedan registrar sesiones
+local internalRecord = script.Parent:FindFirstChild("RecordSessionInternal")
+if not internalRecord then
+	internalRecord = Instance.new("BindableFunction")
+	internalRecord.Name = "RecordSessionInternal"
+	internalRecord.Parent = script.Parent
+end
+internalRecord.OnInvoke = recordSession
 
 print("[SaIyDD] Servicio backend listo: " .. BASE_URL)

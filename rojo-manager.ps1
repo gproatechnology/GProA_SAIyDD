@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env pwsh
+#!/usr/bin/env pwsh
 <#
 .SYNOPSIS
     Gestor interactivo de Rojo y backend para SAIyDD
@@ -266,10 +266,10 @@ function Show-FullStatus {
 
     $tree = Invoke-HttpJson -Method GET -Url "http://localhost:$Port/show-instances"
     if ($tree.code -eq 200) {
-        $needles = @("Shared", "Events", "SAIyDDRecordSession", "SAIyDDHealthCheck", "RemoteEvent", "ServerScriptService", "StarterPlayerScripts")
+        $needles = @("Shared", "Events", "SAIyDDRecordSession", "SAIyDDHealthCheck", "RemoteEvent", "ServerScriptService", "ActivityGui", "StarterPlayerScripts")
         $missing = @($needles | Where-Object { $tree.raw -notmatch [Regex]::Escape($_) })
         if ($missing.Count -eq 0) {
-            Write-Host "  [OK] Árbol Rojo sincronizado (Shared, Events, Server, Client)" -ForegroundColor Green
+            Write-Host "  [OK] Árbol Rojo sincronizado (Shared, Events, Server, ActivityGui, Client)" -ForegroundColor Green
         } else {
             Write-Host "  [WARN] Árbol Rojo incompleto, falta: $($missing -join ', ')" -ForegroundColor Yellow
         }

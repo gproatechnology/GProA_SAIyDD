@@ -6,3 +6,9 @@ __pycache__/
 dist/
 node_modules/
 rojo/server/secrets.lua
+
+# Artefactos locales de Roblox Studio (build de Rojo y locks por maquina)
+*.rbxl
+*.rbxl.lock
+*.rbxlx
+*.rbxlx.lock

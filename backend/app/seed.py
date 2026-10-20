@@ -1,6 +1,7 @@
+from datetime import datetime, timezone
 from sqlmodel import Session, select
 
-from app.models import ActivityModel
+from app.models import ActivityModel, ChildModel
 
 CATALOG: list[dict] = [
     {
@@ -48,11 +49,30 @@ CATALOG: list[dict] = [
     },
 ]
 
+TEST_CHILD_DATA: dict = {
+    "id": "child_TEST_001",
+    "name": "Niño de Prueba (Studio)",
+    "avatar": "robot",
+    "preferences": {"is_test": True},
+}
+
 
 def seed_activities(session: Session) -> None:
     existing = session.exec(select(ActivityModel)).all()
-    if existing:
-        return
-    for item in CATALOG:
-        session.add(ActivityModel(**item))
-    session.commit()
+    if not existing:
+        for item in CATALOG:
+            session.add(ActivityModel(**item))
+        session.commit()
+
+    existing_child = session.get(ChildModel, TEST_CHILD_DATA["id"])
+    if not existing_child:
+        session.add(
+            ChildModel(
+                id=TEST_CHILD_DATA["id"],
+                name=TEST_CHILD_DATA["name"],
+                avatar=TEST_CHILD_DATA["avatar"],
+                preferences=TEST_CHILD_DATA["preferences"],
+                created_at=datetime.now(timezone.utc),
+            )
+        )
+        session.commit()
