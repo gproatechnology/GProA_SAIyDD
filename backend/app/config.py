@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     environment: str = "development"
     database_url: str = "sqlite:///./saiydd.db"
-    cors_origins: str = "http://localhost:5174"
+    cors_origins: str = "http://localhost:5174,http://localhost:8081"
     jwt_secret: str = "dev-secret-cambiar-en-produccion"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60

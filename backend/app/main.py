@@ -27,6 +27,7 @@ from app.repositories import (
     get_progress,
     get_tutor_by_email,
     list_activities,
+    list_sessions_by_child,
     tutor_exists,
 )
 from app.seed import seed_activities
@@ -65,7 +66,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 app.state.limiter = limiter
@@ -156,6 +157,21 @@ def get_progress_endpoint(
     return get_progress(session, child_id)
 
 
+@app.get(
+    "/api/children/{child_id}/sessions",
+    response_model=list[SessionRecord],
+    tags=["sesiones"],
+)
+def list_sessions_endpoint(
+    child_id: str,
+    tutor: TutorModel = Depends(require_tutor),
+    session: Session = Depends(get_session),
+) -> list[SessionRecord]:
+    if not child_exists(session, child_id):
+        raise HTTPException(status_code=404, detail="Niño no encontrado")
+    return list_sessions_by_child(session, child_id)
+
+
 @app.delete(
     "/api/children/{child_id}",
     response_model=dict,
@@ -191,7 +207,7 @@ def register_endpoint(
 
 
 @app.post("/api/auth/login", response_model=TokenResponse, tags=["auth"])
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 def login_endpoint(
     request: Request,
     data: LoginRequest,

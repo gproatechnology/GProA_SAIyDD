@@ -107,6 +107,15 @@ def get_progress(session: Session, child_id: str) -> ProgressReport:
     )
 
 
+def list_sessions_by_child(session: Session, child_id: str) -> list[SessionRecord]:
+    sessions = session.exec(
+        select(SessionModel)
+        .where(SessionModel.child_id == child_id)
+        .order_by(SessionModel.finished_at.desc())
+    ).all()
+    return [to_session_record(s) for s in sessions]
+
+
 def to_child_profile(child: ChildModel) -> ChildProfile:
     return ChildProfile(
         id=child.id,

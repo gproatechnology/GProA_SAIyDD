@@ -25,8 +25,11 @@ $BACKEND_DIR = Join-Path $SAIYDD_ROOT "backend"
 $VENV_PYTHON = Join-Path $SAIYDD_ROOT ".venv\Scripts\python.exe"
 $SECRETS_FILE = Join-Path $SAIYDD_ROOT "rojo\server\secrets.lua"
 $STATE_FILE = Join-Path $env:TEMP "saiydd-state.json"
+$EDUCATOR_SUITE_DIR = Join-Path $SAIYDD_ROOT "tools\educator-suite"
+$EDUCATOR_PORT = 8081
 $script:rojoPid = $null
 $script:backendPid = $null
+$script:educatorPid = $null
 
 # --- Utilidades HTTP (curl.exe: funciona contra localhost en este entorno) ---
 
@@ -307,6 +310,7 @@ function Show-Menu {
     Write-Host "  [7] Iniciar/Detener backend (uvicorn)" -ForegroundColor Green
     Write-Host "  [8] Flujo completo (backend + servicio + sesion)" -ForegroundColor Green
     Write-Host "  [9] Estado integral (puertos, Rojo, backend)" -ForegroundColor Yellow
+    Write-Host "  [10] Iniciar/Detener Suite Educativa (:8081)" -ForegroundColor Magenta
     Write-Host "  [Q] Salir" -ForegroundColor Gray
     Write-Host ""
 }
@@ -402,13 +406,78 @@ function Read-Enter {
     Read-Host "Presiona Enter para continuar" | Out-Null
 }
 
-# --- Cleanup on exit ---
+# --- Suite Educativa (Panel para profesional) ---
+
+function Get-EducatorListener {
+    return Get-NetTCPConnection -LocalPort $EDUCATOR_PORT -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+}
+
+function Start-EducatorSuite {
+    $existing = Get-EducatorListener
+    if ($existing) {
+        Write-Host "[i] Suite Educativa ya corriendo (PID: $($existing.OwningProcess)) en :$EDUCATOR_PORT" -ForegroundColor Cyan
+        Write-Host "[i] URL: http://localhost:$EDUCATOR_PORT" -ForegroundColor Cyan
+        Read-Enter
+        return $true
+    }
+    if (-not (Test-Path $EDUCATOR_SUITE_DIR)) {
+        Write-Host "[ERROR] No se encontró tools/educator-suite" -ForegroundColor Red
+        Read-Enter
+        return $false
+    }
+    Write-Host "`n[*] Iniciando Suite Educativa en :$EDUCATOR_PORT..." -ForegroundColor Yellow
+    $proc = Start-Process -FilePath "python" -ArgumentList "-m", "http.server", "$EDUCATOR_PORT" -WorkingDirectory $EDUCATOR_SUITE_DIR -WindowStyle Hidden -PassThru
+    if (-not $proc) {
+        Write-Host "[ERROR] No se pudo iniciar la Suite Educativa" -ForegroundColor Red
+        Read-Enter
+        return $false
+    }
+    $script:educatorPid = $proc.Id
+    Start-Sleep -Seconds 2
+    Write-Host "[OK] Suite Educativa iniciada (PID: $($script:educatorPid))" -ForegroundColor Green
+    Write-Host "[i] URL: http://localhost:$EDUCATOR_PORT" -ForegroundColor Cyan
+    Write-Host "[i] Login con credenciales de tutor" -ForegroundColor Cyan
+    Read-Enter
+    return $true
+}
+
+function Stop-EducatorSuite {
+    $existing = Get-EducatorListener
+    if ($existing) {
+        try {
+            Stop-Process -Id $existing.OwningProcess -Force -ErrorAction Stop
+            Write-Host "[OK] Suite Educativa detenida (PID: $($existing.OwningProcess))" -ForegroundColor Green
+        } catch {
+            Write-Host "[ERROR] No se pudo detener: $($_.Exception.Message)" -ForegroundColor Red
+        }
+    } else {
+        Write-Host "[i] Suite Educativa no está corriendo" -ForegroundColor Gray
+    }
+    $script:educatorPid = $null
+    Read-Enter
+}
+
+function Switch-EducatorSuite {
+    if (Get-EducatorListener) {
+        Stop-EducatorSuite
+    } else {
+        Start-EducatorSuite
+    }
+}
+
 function Cleanup {
     if ($script:rojoPid) {
         Stop-Process -Id $script:rojoPid -Force -ErrorAction SilentlyContinue
     }
     if ($script:backendPid) {
         Stop-Process -Id $script:backendPid -Force -ErrorAction SilentlyContinue
+    }
+    if ($script:educatorPid) {
+        Stop-Process -Id $script:educatorPid -Force -ErrorAction SilentlyContinue
+    }
+    $existingEdu = Get-EducatorListener
+    if ($existingEdu) {
+        Stop-Process -Id $existingEdu.OwningProcess -Force -ErrorAction SilentlyContinue
     }
 }
 $global:CleanupScript = $function:Cleanup
@@ -430,6 +499,7 @@ try {
             "7" { Switch-Backend }
             "8" { Invoke-FullFlow }
             "9" { Show-FullStatus }
+            "10" { Switch-EducatorSuite }
             "Q" { Write-Host "`n[!] Saliendo..." -ForegroundColor Gray; $running = $false }
             default { Write-Host "[!] Opcion invalida" -ForegroundColor Red; Start-Sleep 1 }
         }

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaIyDD | Suite Educativa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- LOGIN VIEW -->
+    <section id="loginView" class="view">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>SaIyDD</h1>
+                <p>Suite Educativa - Visualizador de Resultados</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="loginEmail">Correo electrónico</label>
+                    <input type="email" id="loginEmail" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña</label>
+                    <input type="password" id="loginPassword" autocomplete="current-password" required>
+                </div>
+                <div id="loginError" class="error-message" style="display:none;"></div>
+                <button type="submit" class="btn btn-primary btn-full">Iniciar sesión</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- APP VIEW -->
+    <section id="appView" class="view" style="display:none;">
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo">SaIyDD</div>
+                <div class="header-subtitle">Suite Educativa</div>
+            </div>
+            <div class="header-right">
+                <div id="tutorInfo" class="tutor-info"></div>
+                <button id="logoutBtn" class="btn btn-ghost">Cerrar sesión</button>
+            </div>
+        </header>
+
+        <div class="app-body">
+            <nav class="sidebar">
+                <button class="nav-btn active" data-tab="dashboard">Panel General</button>
+                <button class="nav-btn" data-tab="alumnos">Alumnos</button>
+                <button class="nav-btn" data-tab="ficha">Ficha del alumno</button>
+                <button class="nav-btn" data-tab="historial">Historial</button>
+                <button class="nav-btn" data-tab="estado">Estado del simulador</button>
+            </nav>
+
+            <main class="content">
+                <!-- DASHBOARD -->
+                <section id="tab-dashboard" class="tab-section">
+                    <div class="section-header">
+                        <h2>Panel General</h2>
+                        <p class="section-subtitle">Resumen rápido de resultados</p>
+                    </div>
+                    <div class="cards-grid">
+                        <div class="card">
+                            <div class="card-label">Total niños</div>
+                            <div class="card-value" id="cardTotalChildren">-</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-label">Sesiones totales</div>
+                            <div class="card-value" id="cardTotalSessions">-</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-label">Promedio general</div>
+                            <div class="card-value" id="cardAvgScore">-</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-label">Última sesión</div>
+                            <div class="card-value card-value-sm" id="cardLastSession">-</div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Últimas sesiones</h3>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha/Hora</th>
+                                        <th>Niño</th>
+                                        <th>Actividad</th>
+                                        <th>Puntaje</th>
+                                        <th>Duración</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboardRecentBody">
+                                    <tr><td colspan="6" class="table-empty">Sin datos</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ALUMNOS -->
+                <section id="tab-alumnos" class="tab-section" style="display:none;">
+                    <div class="section-header">
+                        <h2>Alumnos</h2>
+                        <p class="section-subtitle">Listado de niños registrados</p>
+                    </div>
+                    <div class="panel">
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Niño</th>
+                                        <th>Avatar</th>
+                                        <th>Sesiones</th>
+                                        <th>Promedio</th>
+                                        <th>Última actividad</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alumnosBody">
+                                    <tr><td colspan="6" class="table-empty">Sin datos</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- FICHA -->
+                <section id="tab-ficha" class="tab-section" style="display:none;">
+                    <div class="section-header">
+                        <h2>Ficha del alumno</h2>
+                        <p class="section-subtitle">Progreso individual</p>
+                    </div>
+                    <div class="ficha-grid">
+                        <div class="panel ficha-panel">
+                            <div class="panel-header">
+                                <h3>Datos del alumno</h3>
+                            </div>
+                            <div class="ficha-info">
+                                <div class="ficha-row"><span class="ficha-label">ID</span><span id="fichaChildId">-</span></div>
+                                <div class="ficha-row"><span class="ficha-label">Nombre</span><span id="fichaChildName">-</span></div>
+                                <div class="ficha-row"><span class="ficha-label">Avatar</span><span id="fichaChildAvatar">-</span></div>
+                                <div class="ficha-row"><span class="ficha-label">Creado</span><span id="fichaChildCreated">-</span></div>
+                            </div>
+                        </div>
+                        <div class="panel ficha-panel">
+                            <div class="panel-header">
+                                <h3>Resumen</h3>
+                            </div>
+                            <div class="ficha-stats">
+                                <div class="ficha-stat"><div class="ficha-stat-label">Sesiones</div><div class="ficha-stat-value" id="fichaTotalSessions">-</div></div>
+                                <div class="ficha-stat"><div class="ficha-stat-label">Promedio</div><div class="ficha-stat-value" id="fichaAvgScore">-</div></div>
+                                <div class="ficha-stat"><div class="ficha-stat-label">Tiempo total</div><div class="ficha-stat-value" id="fichaTotalTime">-</div></div>
+                                <div class="ficha-stat"><div class="ficha-stat-label">Última actividad</div><div class="ficha-stat-value ficha-stat-value-sm" id="fichaLastActivity">-</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Evolución por sesión</h3>
+                        </div>
+                        <canvas id="evolutionChart" height="90"></canvas>
+                    </div>
+                </section>
+
+                <!-- HISTORIAL -->
+                <section id="tab-historial" class="tab-section" style="display:none;">
+                    <div class="section-header">
+                        <h2>Historial de sesiones</h2>
+                        <p class="section-subtitle">Todas las sesiones registradas</p>
+                    </div>
+                    <div class="panel">
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha/Hora</th>
+                                        <th>Actividad</th>
+                                        <th>Puntaje</th>
+                                        <th>Duración (s)</th>
+                                        <th>Interacciones</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historialBody">
+                                    <tr><td colspan="6" class="table-empty">Sin datos</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ESTADO -->
+                <section id="tab-estado" class="tab-section" style="display:none;">
+                    <div class="section-header">
+                        <h2>Estado del simulador</h2>
+                        <p class="section-subtitle">Información de desarrollo y sincronización</p>
+                    </div>
+                    <div class="cards-grid">
+                        <div class="card">
+                            <div class="card-label">Backend</div>
+                            <div class="card-value card-value-sm" id="estadoBackend">-</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-label">Rojo (Sync)</div>
+                            <div class="card-value card-value-sm" id="estadoRojo">-</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-label">HTTP Requests</div>
+                            <div class="card-value card-value-sm">Verificar en Studio</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-label">Niño de prueba</div>
+                            <div class="card-value card-value-sm">child_TEST_001</div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Acciones rápidas</h3>
+                        </div>
+                        <div style="padding: 0 24px 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+                            <a class="btn btn-ghost" href="http://127.0.0.1:8000/docs" target="_blank">API Docs</a>
+                            <a class="btn btn-ghost" href="http://localhost:34872" target="_blank">Rojo Dashboard</a>
+                            <a class="btn btn-ghost" href="../../README.md" target="_blank">README</a>
+                            <a class="btn btn-ghost" href="../../docs/manual-usuario.html" target="_blank">Manual de usuario</a>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </section>
+
+    <!-- SESSION DETAIL MODAL -->
+    <div id="sessionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detalle de sesión</h3>
+                <button id="modalClose" class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-summary">
+                    <div class="modal-pill">
+                        <div class="modal-pill-label">Fecha</div>
+                        <div class="modal-pill-value" id="modalDate">-</div>
+                    </div>
+                    <div class="modal-pill">
+                        <div class="modal-pill-label">Actividad</div>
+                        <div class="modal-pill-value" id="modalActivity">-</div>
+                    </div>
+                    <div class="modal-pill">
+                        <div class="modal-pill-label">Puntaje</div>
+                        <div class="modal-pill-value" id="modalScore">-</div>
+                    </div>
+                    <div class="modal-pill">
+                        <div class="modal-pill-label">Duración</div>
+                        <div class="modal-pill-value" id="modalDuration">-</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Interacciones</h3>
+                    </div>
+                    <div class="interaction-list" id="interactionList">
+                        <div class="table-empty">Sin interacciones</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
